@@ -87,6 +87,17 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
+        .code-block {
+            background-color: #1e293b; /* slate-800 */
+            color: #e2e8f0; /* slate-200 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            max-height: 500px;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -147,6 +158,7 @@
                     <button data-tab="branch-logic" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Lógica por Sucursal</button>
                     <button data-tab="personnel" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Reglas de Personal</button>
                     <button data-tab="glossary" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Glosario de Transacciones</button>
+                    <button data-tab="full-code" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Código y Anotaciones</button>
                 </div>
             </div>
 
@@ -261,6 +273,161 @@
                         <!-- Transaction cards will be injected here -->
                     </div>
                 </div>
+
+                <!-- Tab 5: Full Code and Annotations -->
+                <div id="full-code-content" class="hidden">
+                    <h3 class="font-bold text-xl text-slate-700 mb-3 text-center">Código Completo del Script y Anotaciones</h3>
+                    <p class="text-slate-600 mb-8 text-center max-w-3xl mx-auto">
+                        Aquí puedes revisar el script original completo. Utiliza el área de texto al final para registrar tus notas, correcciones o ideas de mejora durante la sesión de trabajo.
+                    </p>
+                    
+                    <div class="space-y-8">
+                        <div>
+                            <h4 class="font-semibold text-lg text-slate-700 mb-2 border-b-2 border-sky-500 pb-1">1. Código de Movimientos y Transacciones</h4>
+                            <pre class="code-block"><code>//// CÓDIGO DE MOVIMIENTOS Y TRANSACCIONES ////
+AUXMovimientos_Inv1:
+NoConcatenate
+LOAD ...
+FROM [lib://.../Movimientos_GestionActual.qvd](qvd);
+
+Concatenate (AUXMovimientos_Inv1)
+LOAD ...
+FROM [lib://.../Movimientos_Gestion2022-2023.qvd](qvd);
+
+Concatenate (AUXMovimientos_Inv1)
+LOAD ...
+FROM [lib://.../Movimientos_GestionAnterior.qvd](qvd);
+ 
+LEFT JOIN(AUXMovimientos_Inv1)
+LOAD ...
+FROM [lib://.../Maestro_Almacenes.qvd](qvd);
+
+AUXMovimientos_Inv:
+LOAD ...
+IF(MATCH (TIPO_TRANS,'Transferencia SubInv Directa') ... ,'RECEPCIONES',
+...
+) AS TIPO_OPERACION,
+...
+RESIDENT AUXMovimientos_Inv1;
+DROP TABLE AUXMovimientos_Inv1;
+
+LEFT JOIN (AUXMovimientos_Inv)
+LOAD ...
+FROM [lib://.../AGRUPADOR PERIODOS TR4.xlsx](ooxml, embedded labels, table is Sheet1);
+
+LEFT JOIN(AUXMovimientos_Inv)
+LOAD ...
+FROM [lib://.../Maestro_Clientes.qvd](qvd);
+
+Movimientos_Inv:
+NoConcatenate
+LOAD ...
+IF(Match(INVENTORY_ITEM_ID, ...),CANTIDAD_UNIDADES*Peso,CANTIDAD_KGS) as CANTIDAD_KGS,
+...
+Resident AUXMovimientos_Inv;
+DROP TABLE AUXMovimientos_Inv;</code></pre>
+                        </div>
+
+                        <div>
+                            <h4 class="font-semibold text-lg text-slate-700 mb-2 border-b-2 border-sky-500 pb-1">2. Código de Transporte y Entrega de Pedidos</h4>
+                            <pre class="code-block"><code>//// CÓDIGO DE TRANSPORTE Y ENTREGA DE PEDIDOS ////
+AUXRutas_Paradas_0:
+NoConcatenate
+LOAD ...
+FROM [lib://.../RutasGM_Gestion2022-2023.qvd](qvd);
+
+Concatenate(AUXRutas_Paradas_0)
+LOAD ...
+FROM [lib://.../RutasGM_GestionAnterior.qvd](qvd);
+
+Concatenate (AUXRutas_Paradas_0)
+LOAD ...
+FROM [lib://.../RutasGM_GestionActual.qvd](qvd);
+
+AUXRutas_Paradas:
+NoConcatenate
+LOAD *
+RESIDENT AUXRutas_Paradas_0
+WHERE ...;
+DROP TABLE AUXRutas_Paradas_0;
+
+Left Join (AUXRutas_Paradas)
+LOAD ...
+FROM [lib://.../No_considerar_GM.xlsx](ooxml, embedded labels, table is FechasNOCONSIDERAR);
+
+DP:
+NoConcatenate
+LOAD Distinct ...
+FROM [lib://.../Desp_transp_GestionActual.qvd](qvd);
+
+... (Concatenates para DP) ...
+
+LEFT JOIN (AUXRutas_Paradas)
+load Distinct ...
+Resident DP;
+DROP TABLE DP;
+
+NoConcatenate
+Rutas_Paradas:
+LOAD ...
+Resident AUXRutas_Paradas
+where ...;
+Drop Table AUXRutas_Paradas;
+
+PERIODO_TR4:
+LOAD ...
+FROM [lib://.../AGRUPADOR PERIODOS TR4.xlsx](ooxml, embedded labels, table is Sheet1);
+
+LEFT JOIN (Rutas_Paradas)
+LOAD ...
+Resident PERIODO_TR4;
+drop table PERIODO_TR4;</code></pre>
+                        </div>
+
+                        <div>
+                            <h4 class="font-semibold text-lg text-slate-700 mb-2 border-b-2 border-sky-500 pb-1">3. Código de Consolidación Final</h4>
+                             <pre class="code-block"><code>//////////////////CÓDIGO DE REUBICADOS (NO APORTAN PRODUCTIVIDAD) Y SINDICATOS (ALGUNOS NO APORTAN)/////////////////////////////////////////////////////////////////////////////////////
+Consolidado:
+NoConcatenate
+LOAD ...
+'Transacciones' AS FLAG,
+...
+resident Movimientos_Inv;
+
+Concatenate (Consolidado)
+LOAD ...
+'Greenmile' AS FLAG,
+...
+If(Match([r.conductorPrincipal]&'-'&SubField([r.codigoRuta],'-',3)&'-'&TIPO_VIAJE_DP,...),'TERCIARIO',
+...
+) AS TIPO_CONDUCTOR,
+...
+Resident Rutas_Paradas;
+
+FINAL_TR4:
+NoConcatenate
+LOAD ...
+IF(Match(ID_EMPLEADO,...),'ALMACEN.SECOS.SCZ-DIST-%',...) AS SECCION,
+...
+IF(ID_EMPLEADO='617' AND FECHA_PROCESO >= DATE('01/10/2023','dd/mm/yyyy'), 'REUBICADO' ,...) AS CONDICION_REUBICADO,
+IF(ID_EMPLEADO='1116' AND FECHA_PROCESO >= DATE('01/09/2023','dd/mm/yyyy'), 'SINDICATO' ,...) AS CONDICION_SINDICATO
+Resident TR4;
+
+FINAL_TR4_2:
+LOAD ...
+IF(WildMatch(AREA,'*TRANSPOR*'),'TRANSPORTE',...) AS AREA_2
+Resident FINAL_TR4;
+
+drop tables Movimientos_Inv, Rutas_Paradas, TR4, FINAL_TR4;</code></pre>
+                        </div>
+                        
+                        <div>
+                             <h4 class="font-semibold text-lg text-slate-700 mb-2 border-b-2 border-amber-500 pb-1">📝 Área de Anotaciones y Comentarios</h4>
+                             <textarea id="notes-area" class="w-full h-64 p-4 border border-slate-300 rounded-md focus:ring-sky-500 focus:border-sky-500" placeholder="Escribe aquí tus notas, correcciones o ideas durante la presentación..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
 
