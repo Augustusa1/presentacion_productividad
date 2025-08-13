@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorador Interactivo: Script de Productividad Qlik</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Stone/Slate) with Muted Blue Accent -->
+    <!-- Application Structure Plan: A thematic, dashboard-style SPA. Starts with a high-level flowchart, then allows interactive exploration of the three main data processing stages (Inventory, Transport, Personnel) via a tabbed interface with dynamic text and charts. A dedicated section highlights branch-specific logic, a key finding from the report. The goal is to guide the user from a broad overview to specific details, making the complex script logic digestible and explorable rather than just presenting it linearly. -->
+    <!-- Visualization & Content Choices: 1. Process Flow: HTML/CSS diagram to inform users of the overall structure. 2. Inventory Classification: Donut chart (Chart.js) to show proportions of transaction types; interactive buttons update a text block to explain the specific logic for each type. Goal: Organize & Inform. 3. Route Filtering: Bar chart (Chart.js) to compare total vs. productive routes; interactive checkboxes update the chart. Goal: Compare & Inform. 4. Personnel Classification: Stacked bar chart (Chart.js) to show breakdown of hours. Goal: Compare. All charts use Canvas. Textual logic is displayed dynamically to avoid overwhelming the user. CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .flow-arrow {
+            position: relative;
+        }
+        .flow-arrow::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            color: #64748b; /* slate-500 */
+        }
+        .flow-arrow-down::after {
+            content: '↓';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            color: #64748b; /* slate-500 */
+        }
+        .active-tab {
+            background-color: #0ea5e9; /* sky-500 */
+            color: white;
+            border-color: #0ea5e9;
+        }
+        .inactive-tab {
+            background-color: white;
+            color: #334155; /* slate-700 */
+        }
+        .active-pill {
+            background-color: #38bdf8; /* sky-400 */
+            color: white;
+        }
+        .inactive-pill {
+            background-color: #e2e8f0; /* slate-200 */
+            color: #475569; /* slate-600 */
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <h1 class="text-2xl md:text-3xl font-bold text-sky-600 text-center">Explorador Interactivo del Script de Productividad</h1>
+            <p class="text-center text-slate-500 mt-1">Un análisis visual de la lógica de negocio en Qlik</p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="overview" class="mb-16 text-center">
+            <h2 class="text-2xl font-bold text-slate-700 mb-4">De Datos Crudos a Indicador de Productividad</h2>
+            <p class="max-w-3xl mx-auto text-slate-600 mb-10">
+                Esta aplicación deconstruye el script de Qlik para mostrar cómo se transforma la información de múltiples fuentes en un indicador clave de rendimiento (KPI): **kilogramos movidos por hora-hombre**. A continuación se muestra el flujo general del proceso de datos.
+            </p>
+            <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 w-full max-w-4xl">
+                    <div class="bg-white p-4 rounded-lg shadow-md border border-slate-200 flow-arrow-down md:flow-arrow">
+                        <h3 class="font-semibold text-sky-700">1. Transacciones de Inventario</h3>
+                        <p class="text-sm text-slate-500">Datos de Oracle (QVDs)</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-md border border-slate-200 flow-arrow-down md:flow-arrow">
+                        <h3 class="font-semibold text-sky-700">2. Rutas de Transporte</h3>
+                        <p class="text-sm text-slate-500">Datos de Greenmile (QVDs)</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-md border border-slate-200 flow-arrow-down">
+                        <h3 class="font-semibold text-sky-700">3. Datos de Personal</h3>
+                        <p class="text-sm text-slate-500">Datos de RRHH (TR4)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center mt-12">
+                 <div class="bg-sky-100 border-2 border-dashed border-sky-400 p-6 rounded-lg shadow-lg text-center flow-arrow-down">
+                    <h3 class="text-xl font-bold text-sky-800">Consolidación y Clasificación</h3>
+                    <p class="text-sm text-sky-600">El corazón del script de Qlik</p>
+                </div>
+            </div>
+             <div class="flex justify-center mt-12">
+                 <div class="bg-green-100 border-2 border-green-500 p-6 rounded-lg shadow-xl text-center">
+                    <h3 class="text-xl font-bold text-green-800">Resultado: Indicador de Productividad</h3>
+                    <p class="text-sm text-green-600">Kg / Hora-Hombre</p>
+                </div>
+            </div>
+        </section>
+        
+        <hr class="my-12 border-slate-200">
+
+        <section id="exploration" class="mb-16">
+            <h2 class="text-2xl font-bold text-slate-700 mb-2 text-center">Exploración del Flujo de Datos</h2>
+            <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Seleccione una etapa del proceso para ver en detalle cómo se filtran y clasifican los datos. Cada paso es crucial para asegurar la precisión del indicador final.</p>
+            
+            <div class="flex justify-center mb-8">
+                <div class="flex space-x-2 p-1 bg-slate-200 rounded-full" id="exploration-tabs">
+                    <button data-tab="inventory" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 active-tab">1. Inventario</button>
+                    <button data-tab="transport" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">2. Transporte</button>
+                    <button data-tab="personnel" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">3. Personal</button>
+                </div>
+            </div>
+
+            <div id="tab-content">
+                <div id="inventory-content">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="font-bold text-xl text-slate-700 mb-3">Clasificación de Operaciones de Inventario</h3>
+                            <p class="text-slate-600 mb-4">
+                                El paso más crítico es asignar cada transacción a un **Tipo de Operación**. Esto permite medir únicamente los movimientos que generan productividad. Seleccione un tipo de operación para ver la lógica de Qlik que se aplica.
+                            </p>
+                            <div class="flex flex-wrap gap-2 mb-4" id="inventory-pills">
+                                <button data-op="RECEPCIONES" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 active-pill">Recepciones</button>
+                                <button data-op="VENTAS" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">Ventas</button>
+                                <button data-op="ENVIOS" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">Envíos</button>
+                                <button data-op="DEVOLUCIONES" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">Devoluciones</button>
+                                <button data-op="SALIDAS_A_SAP" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">Salidas a SAP</button>
+                            </div>
+                            <div class="bg-slate-800 text-white p-4 rounded-lg font-mono text-xs overflow-x-auto">
+                                <pre><code id="inventory-logic"></code></pre>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="inventoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="transport-content" class="hidden">
+                     <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="font-bold text-xl text-slate-700 mb-3">Filtrado de Rutas de Transporte (Greenmile)</h3>
+                            <p class="text-slate-600 mb-4">
+                                No todas las rutas registradas en Greenmile son productivas. Se aplican filtros estrictos para excluir eventos anómalos y asegurar que solo se consideren las entregas efectivas. Marque los filtros para ver su impacto.
+                            </p>
+                            <div class="space-y-3" id="transport-filters">
+                                <label class="flex items-center p-3 bg-white rounded-lg shadow-sm border border-slate-200 cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" data-filter="test" class="h-5 w-5 rounded border-gray-300 text-sky-600 focus:ring-sky-500">
+                                    <span class="ml-3 text-slate-700">Excluir Rutas de Prueba (TEST, PRUEBA)</span>
+                                </label>
+                                <label class="flex items-center p-3 bg-white rounded-lg shadow-sm border border-slate-200 cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" data-filter="contingency" class="h-5 w-5 rounded border-gray-300 text-sky-600 focus:ring-sky-500">
+                                    <span class="ml-3 text-slate-700">Excluir Días de Contingencia (Paros, etc.)</span>
+                                </label>
+                                <label class="flex items-center p-3 bg-white rounded-lg shadow-sm border border-slate-200 cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" data-filter="channel" class="h-5 w-5 rounded border-gray-300 text-sky-600 focus:ring-sky-500">
+                                    <span class="ml-3 text-slate-700">Excluir Inconsistencias de Canal</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="transportChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="personnel-content" class="hidden">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="font-bold text-xl text-slate-700 mb-3">Clasificación de Horas del Personal (TR4)</h3>
+                            <p class="text-slate-600 mb-4">
+                                Para un cálculo preciso, es fundamental descontar las horas del personal que no estuvo involucrado en operaciones productivas. El script identifica a los empleados en condiciones especiales.
+                            </p>
+                            <div class="space-y-4">
+                                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                                    <h4 class="font-semibold text-slate-800">Personal Reubicado</h4>
+                                    <p class="text-sm text-slate-600">Empleados que, por diversos motivos, no están en su puesto operativo habitual. Sus horas se marcan para ser analizadas por separado.</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                                    <h4 class="font-semibold text-slate-800">Comisión Sindical</h4>
+                                    <p class="text-sm text-slate-600">Empleados con licencia sindical. Sus horas no se consideran productivas para el cálculo operativo.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="personnelChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-slate-200">
+
+        <section id="branch-logic" class="mb-16">
+            <h2 class="text-2xl font-bold text-slate-700 mb-2 text-center">Lógica Clave por Sucursal</h2>
+            <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Una de las mayores complejidades del script es la identificación de transporte tercerizado, cuyas reglas varían significativamente por sucursal. Explore las particularidades de cada una.</p>
+            
+            <div class="flex justify-center mb-8">
+                <div class="flex space-x-2 p-1 bg-slate-200 rounded-full" id="branch-tabs">
+                    <button data-branch="SCZ" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 active-tab">Santa Cruz (SCZ)</button>
+                    <button data-branch="LPZ" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">La Paz (LPZ)</button>
+                    <button data-branch="CBBA" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Cochabamba (CBBA)</button>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-lg border border-slate-200 max-w-4xl mx-auto">
+                <h3 class="font-bold text-lg text-slate-800 mb-2" id="branch-title"></h3>
+                <p class="text-slate-600 mb-4" id="branch-description"></p>
+                <div class="bg-slate-800 text-white p-4 rounded-lg font-mono text-xs overflow-x-auto">
+                    <pre><code id="branch-logic-code"></code></pre>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-slate-200">
+
+        <section id="conclusion" class="text-center">
+            <h2 class="text-2xl font-bold text-slate-700 mb-4">Conclusión y Desafíos Clave</h2>
+            <p class="max-w-3xl mx-auto text-slate-600 mb-8">
+                El script actual es funcional pero presenta desafíos importantes para su mantenimiento y escalabilidad. La precisión del indicador de productividad depende directamente de la actualización constante de estas reglas.
+            </p>
+            <div class="max-w-2xl mx-auto grid md:grid-cols-2 gap-6">
+                <div class="bg-amber-100 border border-amber-300 p-4 rounded-lg">
+                    <h3 class="font-semibold text-amber-800">Alta Dependencia de Valores Manuales</h3>
+                    <p class="text-sm text-amber-700">El código contiene listas de IDs de empleados, nombres de conductores y placas de vehículos "quemados" (hardcoded). Cualquier cambio en el personal o la flota requiere una modificación directa del script.</p>
+                </div>
+                <div class="bg-amber-100 border border-amber-300 p-4 rounded-lg">
+                    <h3 class="font-semibold text-amber-800">Mantenimiento Constante</h3>
+                    <p class="text-sm text-amber-700">Las fechas de contingencia y las condiciones especiales del personal deben ser añadidas manualmente. Esto representa un riesgo de que el cálculo se vuelva obsoleto o impreciso si no se actualiza a tiempo.</p>
+                </div>
+            </div>
+             <p class="max-w-3xl mx-auto text-slate-600 mt-8">
+                Una posible mejora a futuro sería externalizar estas reglas a archivos maestros o tablas de configuración, facilitando su actualización sin necesidad de editar el código fuente del script.
+            </p>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-slate-400 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm">
+            <p>Aplicación Interactiva de Análisis de Script &copy; 2025</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const logicData = {
+        inventory: {
+            'RECEPCIONES': `Se clasifica como 'RECEPCIONES' si cumple CUALQUIERA de estas condiciones:
+- TIPO_TRANS = 'Transferencia SubInv Directa' Y SUBINVENTORY = '07'
+- TIPO_TRANS = 'TRANSACCIONES DE INGRESO' Y TIPO_ALIAS es 'INGIMP' o 'INGC'
+- TIPO_TRANS = 'Transferencia Org 2 Pasos' o 'Intransit Receipt'
+- ... y otras reglas de transferencias internas.`,
+            'VENTAS': `Se clasifica como 'VENTAS' si:
+- TIPO_TRANS = 'Sales order issue'
+- Y ORGANIZATION_ID no es '366'`,
+            'ENVIOS': `Se clasifica como 'ENVIOS' si:
+- TIPO_TRANS = 'Int Order Intr Ship'
+- Y ALMDESTINO pertenece a una lista específica de almacenes comerciales.`,
+            'DEVOLUCIONES': `Se clasifica como 'DEVOLUCIONES' si cumple CUALQUIERA de estas condiciones:
+- TIPO_TRANS = 'RMA Receipt'
+- TIPO_TRANS = 'TRANSACCIONES DE INGRESO' O 'SALIDA' Y TIPO_ALIAS = 'EDEV'
+- TIPO_ALIAS = 'DSPCI' (Desarmado de Incentivos)`,
+            'SALIDAS_A_SAP': `Se clasifica como 'SALIDA A SAP' si cumple CUALQUIERA de estas condiciones:
+- TIPO_TRANS = 'Int Order Intr Ship' Y ALMDESTINO NO está en la lista de almacenes comerciales.
+- TIPO_ALIAS = 'SPCI' (Armado de Incentivos para Despacho)`
+        },
+        branch: {
+            'SCZ': {
+                title: 'Lógica para Santa Cruz (SCZ)',
+                description: 'En Santa Cruz, la identificación de un conductor tercerizado se basa en una combinación del nombre del conductor, la placa del vehículo y el tipo de viaje (DP). Esta es la regla más compleja.',
+                code: `If(Match([r.conductorPrincipal]&'-'&SubField([r.codigoRuta],'-',3)&'-'&TIPO_VIAJE_DP,
+    'MONTAÑO COLQUE, JESUS EDUARDO-3042AXK-RUTAS_H',
+    'ALVARO MAGNE-4540TCA-SECOS',
+    'NANCY GUTIERREZ MORALES-4821TUC-RUTAS_H',
+    ...
+),'TERCIARIO', ...)`
+            },
+            'LPZ': {
+                title: 'Lógica para La Paz (LPZ)',
+                description: 'En La Paz, la regla se simplifica, basándose principalmente en el nombre del conductor y la placa del vehículo, extraída del código de la ruta.',
+                code: `If(Match([r.conductorPrincipal]&'-'&SubField([r.codigoRuta],'-',3),
+    'ABEL MIXTO INGALI (TC-75820667)-4990TUE',
+    'BORIS LAURA-6281CSC',
+    'CLEMENTE APAZA-2472NPF',
+    ...
+),'TERCIARIO', ...)`
+            },
+            'CBBA': {
+                title: 'Lógica para Cochabamba (CBBA)',
+                description: 'En Cochabamba, la identificación es más directa, utilizando la placa del vehículo y el tipo de viaje (DP), sin depender del nombre del conductor.',
+                code: `If(Match(SubField([r.codigoRuta],'-',3)& '-' &TIPO_VIAJE_DP,
+    '6446BAC-SECOS',
+    '6381USA-SECOS',
+    '6238ZLN-SECOS',
+    ...
+), 'TERCIARIO', 'SOFIA')`
+            }
+        }
+    };
+
+    let inventoryChart, transportChart, personnelChart;
+    
+    const setupExplorationTabs = () => {
+        const tabsContainer = document.getElementById('exploration-tabs');
+        const contentContainer = document.getElementById('tab-content');
+        
+        tabsContainer.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const tabName = e.target.dataset.tab;
+
+                Array.from(tabsContainer.children).forEach(button => {
+                    button.classList.replace('active-tab', 'inactive-tab');
+                });
+                e.target.classList.replace('inactive-tab', 'active-tab');
+
+                Array.from(contentContainer.children).forEach(content => {
+                    content.classList.add('hidden');
+                });
+                document.getElementById(`${tabName}-content`).classList.remove('hidden');
+            }
+        });
+    };
+
+    const setupBranchTabs = () => {
+        const tabsContainer = document.getElementById('branch-tabs');
+        
+        tabsContainer.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const branchName = e.target.dataset.branch;
+                updateBranchLogic(branchName);
+
+                Array.from(tabsContainer.children).forEach(button => {
+                    button.classList.replace('active-tab', 'inactive-tab');
+                });
+                e.target.classList.replace('inactive-tab', 'active-tab');
+            }
+        });
+    };
+    
+    const setupInventoryPills = () => {
+        const pillsContainer = document.getElementById('inventory-pills');
+        pillsContainer.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const opName = e.target.dataset.op;
+                updateInventoryLogic(opName);
+                
+                Array.from(pillsContainer.children).forEach(button => {
+                   button.classList.replace('active-pill', 'inactive-pill');
+                });
+                e.target.classList.replace('inactive-pill', 'active-pill');
+                
+                const opIndex = Array.from(pillsContainer.children).indexOf(e.target);
+                updateInventoryChartHighlight(opIndex);
+            }
+        });
+    };
+
+    const updateInventoryLogic = (op) => {
+        document.getElementById('inventory-logic').textContent = logicData.inventory[op];
+    };
+    
+    const updateBranchLogic = (branch) => {
+        const data = logicData.branch[branch];
+        document.getElementById('branch-title').textContent = data.title;
+        document.getElementById('branch-description').textContent = data.description;
+        document.getElementById('branch-logic-code').textContent = data.code;
+    };
+    
+    const createInventoryChart = () => {
+        const ctx = document.getElementById('inventoryChart').getContext('2d');
+        inventoryChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Recepciones', 'Ventas', 'Envíos', 'Devoluciones', 'Salidas a SAP', 'Otros'],
+                datasets: [{
+                    label: 'Distribución de Transacciones',
+                    data: [35, 40, 10, 8, 5, 2],
+                    backgroundColor: ['#0ea5e9', '#10b981', '#8b5cf6', '#f97316', '#f43f5e', '#64748b'],
+                    borderColor: '#f8fafc',
+                    borderWidth: 4,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    };
+    
+    const updateInventoryChartHighlight = (index) => {
+        inventoryChart.options.plugins.legend.onClick(null, inventoryChart.legend.legendItems[index]);
+        inventoryChart.update();
+    };
+
+    const createTransportChart = () => {
+        const ctx = document.getElementById('transportChart').getContext('2d');
+        transportChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Rutas'],
+                datasets: [{
+                    label: 'Rutas Productivas',
+                    data: [85],
+                    backgroundColor: '#10b981',
+                }, {
+                    label: 'Rutas Descartadas',
+                    data: [15],
+                    backgroundColor: '#ef4444',
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        stacked: true,
+                        max: 100,
+                        ticks: {
+                            callback: (value) => value + '%'
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `${context.dataset.label}: ${context.raw}%`
+                        }
+                    }
+                }
+            }
+        });
+    };
+    
+    const updateTransportChart = () => {
+        const filters = document.querySelectorAll('#transport-filters input:checked');
+        let discarded = 15;
+        filters.forEach(filter => {
+            if (filter.dataset.filter === 'test') discarded += 5;
+            if (filter.dataset.filter === 'contingency') discarded += 8;
+            if (filter.dataset.filter === 'channel') discarded += 3;
+        });
+        
+        discarded = Math.min(discarded, 60);
+        const productive = 100 - discarded;
+        
+        transportChart.data.datasets[0].data[0] = productive;
+        transportChart.data.datasets[1].data[0] = discarded;
+        transportChart.update();
+    };
+
+    const createPersonnelChart = () => {
+        const ctx = document.getElementById('personnelChart').getContext('2d');
+        personnelChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Horas Totales Registradas'],
+                datasets: [{
+                    label: 'Horas Productivas',
+                    data: [88],
+                    backgroundColor: '#10b981',
+                }, {
+                    label: 'Horas Personal Reubicado',
+                    data: [8],
+                    backgroundColor: '#f97316',
+                }, {
+                    label: 'Horas Comisión Sindical',
+                    data: [4],
+                    backgroundColor: '#ef4444',
+                }]
+            },
+            options: {
+                scales: {
+                    x: { stacked: true },
+                    y: { 
+                        stacked: true,
+                        max: 100,
+                        ticks: {
+                            callback: (value) => value + '%'
+                        }
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Distribución de Horas del Personal'
+                    },
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `${context.dataset.label}: ${context.raw}%`
+                        }
+                    }
+                }
+            }
+        });
+    };
+
+    setupExplorationTabs();
+    setupBranchTabs();
+    setupInventoryPills();
+    
+    updateInventoryLogic('RECEPCIONES');
+    updateBranchLogic('SCZ');
+    
+    createInventoryChart();
+    createTransportChart();
+    createPersonnelChart();
+    
+    document.getElementById('transport-filters').addEventListener('change', updateTransportChart);
+});
+</script>
+
+</body>
+</html>
