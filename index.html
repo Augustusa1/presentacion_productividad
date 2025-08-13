@@ -71,14 +71,6 @@
             background-color: #e2e8f0; /* slate-200 */
             color: #475569; /* slate-600 */
         }
-        #branch-description ul {
-            list-style-position: inside;
-            margin-left: 0;
-            padding-left: 0;
-        }
-        #branch-description li {
-            margin-bottom: 0.5rem;
-        }
         .table-container {
             max-height: 400px;
             overflow-y: auto;
@@ -154,170 +146,175 @@
             
             <div class="flex justify-center mb-8">
                 <div class="flex flex-wrap justify-center gap-2 p-1 bg-slate-200 rounded-full" id="exploration-tabs">
-                    <button data-tab="inventory" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 active-tab">Clasificación de Operaciones</button>
-                    <button data-tab="warehouses" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Análisis de Almacenes</button>
-                    <button data-tab="branch-logic" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Lógica por Sucursal</button>
-                    <button data-tab="personnel" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Reglas de Personal</button>
+                    <button data-tab="logic" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 active-tab">Lógica del Script</button>
+                    <button data-tab="data-explorer" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Explorador de Datos</button>
                     <button data-tab="full-code" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Código y Anotaciones</button>
                 </div>
             </div>
 
             <div id="tab-content">
-                <!-- Tab 1: Inventory Classification -->
-                <div id="inventory-content">
-                    <div class="grid md:grid-cols-2 gap-8 items-center">
-                        <div>
-                            <h3 class="font-bold text-xl text-slate-700 mb-3">¿Cómo sabe el sistema qué es cada movimiento?</h3>
-                            <p class="text-slate-600 mb-4">
-                                El paso más crítico es asignar cada transacción a un **Tipo de Operación**. Esto permite medir únicamente los movimientos que generan productividad. Seleccione un tipo de operación para ver la lógica de Qlik que se aplica.
-                            </p>
-                            <div class="flex flex-wrap gap-2 mb-4" id="inventory-pills">
-                                <button data-op="RECEPCIONES" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 active-pill">Recepciones</button>
-                                <button data-op="VENTAS" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">Ventas</button>
-                                <button data-op="ENVIOS" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">Envíos</button>
-                                <button data-op="DEVOLUCIONES" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">Devoluciones</button>
-                                <button data-op="SALIDAS_A_SAP" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">Salidas a SAP</button>
-                            </div>
-                            <div class="bg-slate-800 text-white p-4 rounded-lg font-mono text-xs overflow-x-auto">
-                                <pre><code id="inventory-logic"></code></pre>
+                <!-- Tab 1: Script Logic -->
+                <div id="logic-content">
+                    <div class="flex justify-center mb-6">
+                         <div class="flex space-x-2 p-1 bg-white rounded-full border shadow-sm" id="logic-pills">
+                            <button data-logic="inventory" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 active-pill">Clasificación de Operaciones</button>
+                            <button data-logic="branch" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">Lógica por Sucursal</button>
+                            <button data-logic="personnel" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">Reglas de Personal</button>
+                        </div>
+                    </div>
+                    
+                    <div id="logic-details-content">
+                        <!-- Inventory Logic -->
+                        <div id="inventory-logic-content">
+                             <div class="grid md:grid-cols-2 gap-8 items-center">
+                                <div>
+                                    <h3 class="font-bold text-xl text-slate-700 mb-3">¿Cómo sabe el sistema qué es cada movimiento?</h3>
+                                    <p class="text-slate-600 mb-4">
+                                        El paso más crítico es asignar cada transacción a un **Tipo de Operación**. Esto permite medir únicamente los movimientos que generan productividad. Seleccione un tipo de operación para ver la lógica de Qlik que se aplica.
+                                    </p>
+                                    <div class="flex flex-wrap gap-2 mb-4" id="inventory-op-pills">
+                                        <button data-op="RECEPCIONES" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 active-pill">Recepciones</button>
+                                        <button data-op="VENTAS" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">Ventas</button>
+                                        <button data-op="ENVIOS" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">Envíos</button>
+                                        <button data-op="DEVOLUCIONES" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">Devoluciones</button>
+                                        <button data-op="SALIDAS_A_SAP" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">Salidas a SAP</button>
+                                    </div>
+                                    <div class="bg-slate-800 text-white p-4 rounded-lg font-mono text-xs overflow-x-auto">
+                                        <pre><code id="inventory-logic-code"></code></pre>
+                                    </div>
+                                </div>
+                                <div class="chart-container">
+                                    <canvas id="inventoryChart"></canvas>
+                                </div>
                             </div>
                         </div>
-                        <div class="chart-container">
-                            <canvas id="inventoryChart"></canvas>
+                        <!-- Branch Logic -->
+                        <div id="branch-logic-content" class="hidden">
+                             <h3 class="font-bold text-xl text-slate-700 mb-3 text-center">¿Por qué cada sucursal tiene reglas diferentes?</h3>
+                             <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Una de las mayores complejidades del script es la identificación de transporte tercerizado, ya que la forma de registrarlo no es la misma en todas partes. Explore las particularidades de cada sucursal.</p>
+                            <div class="flex justify-center mb-8">
+                                <div class="flex space-x-2 p-1 bg-slate-200 rounded-full" id="branch-tabs">
+                                    <button data-branch="SCZ" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 active-tab">Santa Cruz (SCZ)</button>
+                                    <button data-branch="LPZ" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">La Paz (LPZ)</button>
+                                    <button data-branch="CBBA" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Cochabamba (CBBA)</button>
+                                </div>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-lg border border-slate-200 max-w-4xl mx-auto">
+                                <h4 class="font-bold text-lg text-slate-800 mb-2" id="branch-title"></h4>
+                                <div class="text-slate-600 mb-4 space-y-3" id="branch-description"></div>
+                                <div class="mt-6">
+                                    <h5 class="font-semibold text-sm text-slate-500 mb-2">Fragmento de Código de Referencia:</h5>
+                                    <div class="bg-slate-800 text-white p-4 rounded-lg font-mono text-xs overflow-x-auto">
+                                        <pre><code id="branch-logic-code"></code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Personnel Logic -->
+                        <div id="personnel-logic-content" class="hidden">
+                            <h3 class="font-bold text-xl text-slate-700 mb-3 text-center">¿Las horas de quiénes se excluyen del cálculo?</h3>
+                            <p class="text-slate-600 mb-8 text-center max-w-3xl mx-auto">
+                                Para calcular la productividad real, necesitamos saber qué horas de trabajo cuentan y cuáles no. El script usa "listas especiales" para excluir las horas de personas que no estaban haciendo trabajo operativo.
+                            </p>
+                            <div class="flex justify-center mb-6">
+                                 <div class="flex space-x-2 p-1 bg-slate-200 rounded-full" id="personnel-pills">
+                                    <button data-personnel="reubicados" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 active-pill">🧑‍🔧 Reubicados</button>
+                                    <button data-personnel="sindicato" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">✊ Sindicato</button>
+                                    <button data-personnel="especiales" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">⭐ Otras Asignaciones</button>
+                                </div>
+                            </div>
+                            <div id="personnel-details-content" class="grid lg:grid-cols-5 gap-8">
+                                <div class="lg:col-span-3 bg-white p-6 rounded-lg shadow-lg border border-slate-200">
+                                    <h4 id="personnel-title" class="font-bold text-lg text-slate-800 mb-2"></h4>
+                                    <p id="personnel-description" class="text-slate-600 mb-4"></p>
+                                    <div class="table-container border border-slate-200 rounded-md">
+                                        <table class="w-full text-sm text-left">
+                                            <thead class="bg-slate-100 text-xs text-slate-700 uppercase sticky top-0">
+                                                <tr>
+                                                    <th scope="col" class="px-4 py-3">ID Empleado</th>
+                                                    <th scope="col" class="px-4 py-3">Condición</th>
+                                                    <th scope="col" class="px-4 py-3">Suc.</th>
+                                                    <th scope="col" class="px-4 py-3">Comentarios del Script</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="personnel-table-body" class="divide-y divide-slate-200">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="lg:col-span-2 chart-container self-center">
+                                    <canvas id="personnelChart"></canvas>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tab 2: Branch Logic -->
-                <div id="branch-logic-content" class="hidden">
-                     <h3 class="font-bold text-xl text-slate-700 mb-3 text-center">¿Por qué cada sucursal tiene reglas diferentes?</h3>
-                     <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Una de las mayores complejidades del script es la identificación de transporte tercerizado, ya que la forma de registrarlo no es la misma en todas partes. Explore las particularidades de cada sucursal.</p>
-                    <div class="flex justify-center mb-8">
-                        <div class="flex space-x-2 p-1 bg-slate-200 rounded-full" id="branch-tabs">
-                            <button data-branch="SCZ" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 active-tab">Santa Cruz (SCZ)</button>
-                            <button data-branch="LPZ" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">La Paz (LPZ)</button>
-                            <button data-branch="CBBA" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Cochabamba (CBBA)</button>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow-lg border border-slate-200 max-w-4xl mx-auto">
-                        <h4 class="font-bold text-lg text-slate-800 mb-2" id="branch-title"></h4>
-                        <div class="text-slate-600 mb-4 space-y-3" id="branch-description"></div>
-                        <div class="mt-6">
-                            <h5 class="font-semibold text-sm text-slate-500 mb-2">Fragmento de Código de Referencia:</h5>
-                            <div class="bg-slate-800 text-white p-4 rounded-lg font-mono text-xs overflow-x-auto">
-                                <pre><code id="branch-logic-code"></code></pre>
+                <!-- Tab 2: Data Explorer -->
+                <div id="data-explorer-content" class="hidden">
+                    <h3 class="font-bold text-xl text-slate-700 mb-3 text-center">Explorador de Datos Maestros</h3>
+                    <p class="text-slate-600 mb-8 text-center max-w-3xl mx-auto">
+                        Aquí cruzamos toda la información: qué es cada transacción, quién la origina y cómo el script la interpreta, todo en el contexto de los almacenes donde ocurren.
+                    </p>
+                    <div class="bg-white p-6 rounded-lg shadow-lg border border-slate-200 mb-8">
+                        <h4 class="font-bold text-lg text-slate-800 mb-4">Anatomía de las Transferencias y Movimientos Clave</h4>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="border border-slate-200 p-4 rounded-lg bg-slate-50">
+                                <h5 class="font-semibold text-slate-700">Transferencia entre Organizaciones</h5>
+                                <p class="text-sm text-slate-600">Mueve producto entre dos "organizaciones" o centros de distribución principales. Es una operación logística clave para balancear inventario a nivel nacional.</p>
+                                <div class="mt-2 text-center p-2 bg-white rounded-md border">
+                                    <div class="font-semibold">CD SCZ (C43) ➔ CD LPZ (C42)</div>
+                                    <div class="text-xs text-slate-500">TIPO_TRANS: `Direct Org Transfer`, `Transferencia Org 2 Pasos`</div>
+                                </div>
+                            </div>
+                            <div class="border border-slate-200 p-4 rounded-lg bg-slate-50">
+                                <h5 class="font-semibold text-slate-700">Transferencia Interna de CD</h5>
+                                <p class="text-sm text-slate-600">Mueve producto DENTRO del mismo CD. No sale del edificio, solo cambia de área (ej: de recepción a picking).</p>
+                                <div class="mt-2 text-center p-2 bg-white rounded-md border">
+                                    <div class="font-semibold">Dentro de CD SCZ (C43): Área '07' ➔ Área '01'</div>
+                                    <div class="text-xs text-slate-500">TIPO_TRANS: `Subinventory Transfer`, `Move Order Transfer`</div>
+                                </div>
+                            </div>
+                            <div class="border border-slate-200 p-4 rounded-lg bg-slate-50">
+                                <h5 class="font-semibold text-slate-700">Abastecimiento a Almacenes Secundarios</h5>
+                                <p class="text-sm text-slate-600">Es la salida de un CD principal para abastecer a otro almacén de la red, como una agencia comercial o un CD regional.</p>
+                                <div class="mt-2 text-center p-2 bg-white rounded-md border">
+                                    <div class="font-semibold">CD SCZ (C43) ➔ Agencia Grigota (A01)</div>
+                                    <div class="text-xs text-slate-500">TIPO_TRANS: `Int Order Intr Ship`</div>
+                                </div>
+                            </div>
+                            <div class="border border-slate-200 p-4 rounded-lg bg-slate-50">
+                                <h5 class="font-semibold text-slate-700">Recepción de Mercadería Externa</h5>
+                                <p class="text-sm text-slate-600">Ingreso de producto desde un proveedor externo (una compra) o la devolución de un cliente.</p>
+                                <div class="mt-2 text-center p-2 bg-white rounded-md border">
+                                    <div class="font-semibold">Proveedor ➔ CD CBBA (C31)</div>
+                                    <div class="text-xs text-slate-500">TIPO_TRANS: `PO Receipt`, `RMA Receipt`</div>
+                                </div>
                             </div>
                         </div>
+                    </div>
+
+                    <h4 class="font-bold text-lg text-slate-800 mb-4 text-center">Glosario Interactivo de Transacciones</h4>
+                    <div class="mb-6 max-w-4xl mx-auto flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <label for="transaction-filter-group" class="block text-sm font-medium text-slate-700">Filtrar por Grupo</label>
+                            <select id="transaction-filter-group" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md">
+                                <option value="Todos">Todos los Grupos</option>
+                                <option value="SAP">SAP</option>
+                                <option value="Centro de Distribución">Centro de Distribución</option>
+                            </select>
+                        </div>
+                         <div class="flex-1">
+                            <label for="transaction-search" class="block text-sm font-medium text-slate-700">Buscar por Nombre</label>
+                            <input type="text" id="transaction-search" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md" placeholder="Ej: Sales order issue">
+                        </div>
+                    </div>
+                    <div id="transaction-container" class="space-y-4">
+                        <!-- Transaction cards will be injected here -->
                     </div>
                 </div>
                 
-                <!-- Tab 3: Personnel Rules -->
-                <div id="personnel-content" class="hidden">
-                    <h3 class="font-bold text-xl text-slate-700 mb-3 text-center">¿Las horas de quiénes se excluyen del cálculo?</h3>
-                    <p class="text-slate-600 mb-8 text-center max-w-3xl mx-auto">
-                        Para calcular la productividad real, necesitamos saber qué horas de trabajo cuentan y cuáles no. El script usa "listas especiales" para excluir las horas de personas que no estaban haciendo trabajo operativo.
-                    </p>
-                    <div class="flex justify-center mb-6">
-                         <div class="flex space-x-2 p-1 bg-slate-200 rounded-full" id="personnel-pills">
-                            <button data-personnel="reubicados" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 active-pill">🧑‍🔧 Reubicados</button>
-                            <button data-personnel="sindicato" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">✊ Sindicato</button>
-                            <button data-personnel="especiales" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">⭐ Otras Asignaciones</button>
-                        </div>
-                    </div>
-                    <div id="personnel-details-content" class="grid lg:grid-cols-5 gap-8">
-                        <div class="lg:col-span-3 bg-white p-6 rounded-lg shadow-lg border border-slate-200">
-                            <h4 id="personnel-title" class="font-bold text-lg text-slate-800 mb-2"></h4>
-                            <p id="personnel-description" class="text-slate-600 mb-4"></p>
-                            <div class="table-container border border-slate-200 rounded-md">
-                                <table class="w-full text-sm text-left">
-                                    <thead class="bg-slate-100 text-xs text-slate-700 uppercase sticky top-0">
-                                        <tr>
-                                            <th scope="col" class="px-4 py-3">ID Empleado</th>
-                                            <th scope="col" class="px-4 py-3">Condición</th>
-                                            <th scope="col" class="px-4 py-3">Suc.</th>
-                                            <th scope="col" class="px-4 py-3">Comentarios del Script</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="personnel-table-body" class="divide-y divide-slate-200">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="lg:col-span-2 chart-container self-center">
-                            <canvas id="personnelChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tab 4: Warehouse Analysis -->
-                <div id="warehouses-content" class="hidden">
-                    <h3 class="font-bold text-xl text-slate-700 mb-3 text-center">Análisis de Almacenes y Transacciones Clave</h3>
-                    <p class="text-slate-600 mb-8 text-center max-w-3xl mx-auto">
-                        El maestro de almacenes nos permite entender el rol de cada ubicación. Aquí podemos ver cómo interactúan y qué transacciones son vitales para la operación entre ellos.
-                    </p>
-                    <div class="bg-white p-6 rounded-lg shadow-lg border border-slate-200 mb-8">
-                        <h4 class="font-bold text-lg text-slate-800 mb-4">Anatomía de las Transferencias</h4>
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <!-- Transfer Card 1 -->
-                            <div class="border border-slate-200 p-4 rounded-lg">
-                                <h5 class="font-semibold text-slate-700">Direct Org Transfer</h5>
-                                <p class="text-sm text-slate-600">Mueve producto entre dos "organizaciones" o centros de distribución principales. Es una operación logística clave para balancear inventario a nivel nacional.</p>
-                                <div class="mt-2 text-center p-2 bg-slate-50 rounded-md">
-                                    <div class="font-semibold">CD SCZ (C43) ➔ CD LPZ (C42)</div>
-                                    <div class="text-xs text-slate-500">Ejecutado por: Operadores o DP</div>
-                                </div>
-                            </div>
-                             <!-- Transfer Card 2 -->
-                            <div class="border border-slate-200 p-4 rounded-lg">
-                                <h5 class="font-semibold text-slate-700">Transferencia Org 2 Pasos</h5>
-                                <p class="text-sm text-slate-600">Similar a la anterior, pero requiere una confirmación de recepción (`Intransit Receipt`). El producto está "en tránsito" hasta que el destino confirma su llegada.</p>
-                                <div class="mt-2 text-center p-2 bg-slate-50 rounded-md">
-                                    <div class="font-semibold">CD CBBA (C31) ➔ CD Tarija (C10)</div>
-                                    <div class="text-xs text-slate-500">Ejecutado por: Operadores</div>
-                                </div>
-                            </div>
-                             <!-- Transfer Card 3 -->
-                            <div class="border border-slate-200 p-4 rounded-lg">
-                                <h5 class="font-semibold text-slate-700">Int Order Intr Ship</h5>
-                                <p class="text-sm text-slate-600">Es la salida de un CD para abastecer a otro almacén, que puede ser otro CD o una agencia comercial. Es el inicio de una transferencia interna.</p>
-                                <div class="mt-2 text-center p-2 bg-slate-50 rounded-md">
-                                    <div class="font-semibold">CD SCZ (C43) ➔ Agencia Grigota (A01)</div>
-                                    <div class="text-xs text-slate-500">Origen: Pedido Interno</div>
-                                </div>
-                            </div>
-                             <!-- Transfer Card 4 -->
-                            <div class="border border-slate-200 p-4 rounded-lg">
-                                <h5 class="font-semibold text-slate-700">Subinventory Transfer</h5>
-                                <p class="text-sm text-slate-600">Movimiento DENTRO del mismo CD. No sale del edificio, solo cambia de área (ej: de un área de recepción a una de picking o despacho).</p>
-                                <div class="mt-2 text-center p-2 bg-slate-50 rounded-md">
-                                    <div class="font-semibold">Dentro de CD SCZ (C43): Área '07' ➔ Área '01'</div>
-                                    <div class="text-xs text-slate-500">Ejecutado por: TELNET / Operadores</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h4 class="font-bold text-lg text-slate-800 mb-4 text-center">Glosario de Almacenes</h4>
-                    <div class="mb-6 max-w-4xl mx-auto grid sm:grid-cols-3 gap-4">
-                        <div>
-                            <label for="warehouse-filter-suc" class="block text-sm font-medium text-slate-700">Filtrar por Sucursal</label>
-                            <select id="warehouse-filter-suc" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md"></select>
-                        </div>
-                        <div>
-                            <label for="warehouse-filter-group" class="block text-sm font-medium text-slate-700">Filtrar por Grupo</label>
-                            <select id="warehouse-filter-group" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md"></select>
-                        </div>
-                         <div>
-                            <label for="warehouse-search" class="block text-sm font-medium text-slate-700">Buscar por Nombre o Código</label>
-                            <input type="text" id="warehouse-search" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md" placeholder="Ej: Grigota o A01">
-                        </div>
-                    </div>
-                    <div id="warehouse-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Warehouse cards will be injected here -->
-                    </div>
-                </div>
-
-                <!-- Tab 5: Full Code and Annotations -->
+                <!-- Tab 3: Full Code -->
                 <div id="full-code-content" class="hidden">
                     <h3 class="font-bold text-xl text-slate-700 mb-3 text-center">Código Completo del Script y Anotaciones</h3>
                     <p class="text-slate-600 mb-8 text-center max-w-3xl mx-auto">
@@ -632,6 +629,21 @@ document.addEventListener('DOMContentLoaded', () => {
             { ALMACEN: 'C40', ORGANIZATION_ID: '4585', ALMACEN_DESCRIPCION: 'C40: CD Potosi', GRUPO_ORGANIZACIONES: 'DISTRIBUCION', SUC: 'PSI.', Almacen_Agrupador: 'CD' },
             { ALMACEN: 'C41', ORGANIZATION_ID: '4685', ALMACEN_DESCRIPCION: 'C41: CD El Alto', GRUPO_ORGANIZACIONES: 'DISTRIBUCION', SUC: 'LP-EA.', Almacen_Agrupador: 'CD' },
             { ALMACEN: 'W04', ORGANIZATION_ID: '1799', ALMACEN_DESCRIPCION: 'W04: CD Warnes', GRUPO_ORGANIZACIONES: 'DISTRIBUCION', SUC: 'SCZ.', Almacen_Agrupador: 'CD' }
+        ],
+        transactions: [
+            { group: 'SAP', type: 'Direct Org Transfer', alias: false, detail: 'Transferencia directa entre organizaciones', origin: 'Personal de SAP', script_usage: 'Clasificado como RECEPCIONES en el almacén destino.' },
+            { group: 'SAP', type: 'Int Req Intr Rcpt', alias: false, detail: 'Recepción de pedido interno de abastecimiento', origin: 'Personal de SAP', script_usage: 'Clasificado como RECEPCIONES. Es la confirmación de un `Int Order Intr Ship`.' },
+            { group: 'SAP', type: 'Intransit Receipt', alias: false, detail: 'Recepción de transferencia en dos pasos', origin: 'Personal de SAP', script_usage: 'Clasificado como RECEPCIONES. Es el segundo paso de una `Transferencia Org 2 Pasos`.' },
+            { group: 'SAP', type: 'Miscellaneous issue', alias: true, detail: 'Salida miscelánea, normalmente, ventas', origin: 'EBS - Venta directa en SAP', script_usage: 'No se clasifica directamente, depende del TIPO_ALIAS para su interpretación.' },
+            { group: 'SAP', type: 'Miscellaneous receipt', alias: true, detail: 'Ingreso misceláneo, normalmente, anulación de ventas', origin: 'EBS - Reversión de venta', script_usage: 'No se clasifica directamente, depende del TIPO_ALIAS.' },
+            { group: 'SAP', type: 'PO Receipt', alias: false, detail: 'Recepción de Orden de Compra', origin: 'Personal de SAP', script_usage: 'Clasificado como COMPRAS - IMPORTACIONES.' },
+            { group: 'SAP', type: 'Return to Vendor', alias: false, detail: 'Reversión de OC (Devolución a proveedor)', origin: 'Personal de SAP', script_usage: 'Clasificado como COMPRAS - IMPORTACIONES.' },
+            { group: 'SAP', type: 'TRANSACCIONES DE INGRESO', alias: true, detail: 'Transacción Manual de Ingreso con motivo alias', origin: 'Operadores por solicitud de SAP', script_usage: 'Clave. Se usa para clasificar RECEPCIONES (alias INGC, INGIMP, DIFR) y DEVOLUCIONES (alias EDEV).' },
+            { group: 'SAP', type: 'TRANSACCIONES DE SALIDA', alias: true, detail: 'Transacción Manual de Salida con motivo alias', origin: 'Operadores por solicitud de SAP', script_usage: 'Clave. Se usa para clasificar RECEPCIONES (alias INGC, INGIMP, DIFR) y DEVOLUCIONES (alias EDEV).' },
+            { group: 'Centro de Distribución', type: 'Int Order Intr Ship', alias: false, detail: 'Salida de CD por pedido interno de abastecimiento', origin: 'Movimiento de abastecimiento', script_usage: 'Fundamental. Se clasifica como ENVIOS si el destino es un almacén comercial, o como SALIDA A SAP si no lo es.' },
+            { group: 'Centro de Distribución', type: 'RMA Receipt', alias: false, detail: 'Recepción de Devolución autorizada', origin: 'Ejecutado por Operadores', script_usage: 'Clasificado como DEVOLUCIONES.' },
+            { group: 'Centro de Distribución', type: 'Sales order issue', alias: false, detail: 'Salida por pedido registrado (venta, donación, etc)', origin: 'Pedidos comerciales', script_usage: 'Clasificado como VENTAS.' },
+            { group: 'Centro de Distribución', type: 'Transferencia Subinv Directa', alias: false, detail: 'Transferencia entre subinventarios directa', origin: 'Ejecutado por Operadores', script_usage: 'Clasificado como RECEPCIONES si el subinventario destino es el 07 (área de recepción).' }
         ]
     };
 
@@ -657,6 +669,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     };
+    
+    const setupLogicPills = () => {
+        const pillsContainer = document.getElementById('logic-pills');
+        const contentContainer = document.getElementById('logic-details-content');
+
+        pillsContainer.addEventListener('click', (e) => {
+             if (e.target.tagName === 'BUTTON') {
+                const logicType = e.target.dataset.logic;
+                
+                Array.from(pillsContainer.children).forEach(button => {
+                   button.classList.replace('active-pill', 'inactive-pill');
+                });
+                e.target.classList.replace('inactive-pill', 'active-pill');
+
+                Array.from(contentContainer.children).forEach(content => {
+                    content.classList.add('hidden');
+                });
+                document.getElementById(`${logicType}-logic-content`).classList.remove('hidden');
+             }
+        });
+    };
 
     const setupBranchTabs = () => {
         const tabsContainer = document.getElementById('branch-tabs');
@@ -674,8 +707,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
     
-    const setupInventoryPills = () => {
-        const pillsContainer = document.getElementById('inventory-pills');
+    const setupInventoryOpPills = () => {
+        const pillsContainer = document.getElementById('inventory-op-pills');
         pillsContainer.addEventListener('click', (e) => {
             if (e.target.tagName === 'BUTTON') {
                 const opName = e.target.dataset.op;
@@ -708,7 +741,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const updateInventoryLogic = (op) => {
-        document.getElementById('inventory-logic').textContent = logicData.inventory[op];
+        document.getElementById('inventory-logic-code').textContent = logicData.inventory[op];
     };
     
     const updateBranchLogic = (branch) => {
@@ -828,47 +861,36 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     };
-
-    const populateWarehouseFilters = () => {
-        const sucFilter = document.getElementById('warehouse-filter-suc');
-        const groupFilter = document.getElementById('warehouse-filter-group');
-        
-        const sucs = [...new Set(logicData.warehouses.map(w => w.SUC))].sort();
-        const groups = [...new Set(logicData.warehouses.map(w => w.GRUPO_ORGANIZACIONES))].sort();
-
-        sucFilter.innerHTML = '<option value="Todos">Todas las Sucursales</option>';
-        sucs.forEach(s => sucFilter.innerHTML += `<option value="${s}">${s}</option>`);
-
-        groupFilter.innerHTML = '<option value="Todos">Todos los Grupos</option>';
-        groups.forEach(g => groupFilter.innerHTML += `<option value="${g}">${g}</option>`);
-    };
-
-    const populateWarehouses = (filterSuc = 'Todos', filterGroup = 'Todos', searchTerm = '') => {
-        const container = document.getElementById('warehouse-container');
+    
+    const populateTransactions = (filterGroup = 'Todos', searchTerm = '') => {
+        const container = document.getElementById('transaction-container');
         container.innerHTML = '';
-        const filtered = logicData.warehouses.filter(w => {
-            const sucMatch = filterSuc === 'Todos' || w.SUC === filterSuc;
-            const groupMatch = filterGroup === 'Todos' || w.GRUPO_ORGANIZACIONES === filterGroup;
-            const termMatch = searchTerm === '' || w.ALMACEN.toLowerCase().includes(searchTerm.toLowerCase()) || w.ALMACEN_DESCRIPCION.toLowerCase().includes(searchTerm.toLowerCase());
-            return sucMatch && groupMatch && termMatch;
+        const filtered = logicData.transactions.filter(t => {
+            const groupMatch = filterGroup === 'Todos' || t.group === filterGroup;
+            const termMatch = searchTerm === '' || t.type.toLowerCase().includes(searchTerm.toLowerCase());
+            return groupMatch && termMatch;
         });
 
         if (filtered.length === 0) {
-            container.innerHTML = `<p class="text-slate-500 col-span-full text-center">No se encontraron almacenes que coincidan con los filtros.</p>`;
+            container.innerHTML = `<p class="text-slate-500 col-span-full text-center">No se encontraron transacciones.</p>`;
             return;
         }
 
-        filtered.forEach(w => {
+        filtered.forEach(t => {
             const card = `
-                <div class="bg-white p-4 rounded-lg shadow-md border border-slate-200 transaction-card transition-all duration-200">
-                    <div class="flex justify-between items-start">
-                        <h4 class="font-bold text-slate-800">${w.ALMACEN} <span class="text-sm font-normal text-slate-500">(${w.ORGANIZATION_ID})</span></h4>
-                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">${w.SUC}</span>
+                <div class="bg-white p-4 rounded-lg shadow-md border border-slate-200">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-bold text-slate-800 flex-1">${t.type}</h4>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${t.group === 'SAP' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">${t.group}</span>
                     </div>
-                    <p class="text-sm text-slate-600 mt-2">${w.ALMACEN_DESCRIPCION}</p>
-                    <div class="mt-4 pt-3 border-t border-slate-200 text-xs space-y-2">
-                        <p><strong class="font-semibold text-slate-700">Grupo:</strong> ${w.GRUPO_ORGANIZACIONES}</p>
-                        <p><strong class="font-semibold text-slate-700">Agrupador:</strong> ${w.Almacen_Agrupador}</p>
+                    <p class="text-sm text-slate-600">${t.detail}</p>
+                    <div class="mt-3 pt-3 border-t border-slate-200 text-xs space-y-2">
+                        <p><strong class="font-semibold text-slate-700">Origen:</strong> ${t.origin}</p>
+                        <p><strong class="font-semibold text-slate-700">Requiere Alias:</strong> ${t.alias ? '<span class="text-red-600 font-bold">Sí</span>' : 'No'}</p>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-dashed border-sky-300 text-xs">
+                        <p class="font-bold text-sky-800">Anatomía en el Script:</p>
+                        <p class="text-sky-700 italic">${t.script_usage}</p>
                     </div>
                 </div>
             `;
@@ -876,19 +898,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const setupWarehouseFilters = () => {
-        const sucFilter = document.getElementById('warehouse-filter-suc');
-        const groupFilter = document.getElementById('warehouse-filter-group');
-        const searchInput = document.getElementById('warehouse-search');
+    const setupTransactionFilters = () => {
+        const groupFilter = document.getElementById('transaction-filter-group');
+        const searchInput = document.getElementById('transaction-search');
 
         const applyFilters = () => {
-            const suc = sucFilter.value;
             const group = groupFilter.value;
             const search = searchInput.value;
-            populateWarehouses(suc, group, search);
+            populateTransactions(group, search);
         };
 
-        sucFilter.addEventListener('change', applyFilters);
         groupFilter.addEventListener('change', applyFilters);
         searchInput.addEventListener('input', applyFilters);
     };
@@ -896,21 +915,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial Setup
     setupExplorationTabs();
+    setupLogicPills();
     setupBranchTabs();
-    setupInventoryPills();
+    setupInventoryOpPills();
     setupPersonnelPills();
-    populateWarehouseFilters();
-    setupWarehouseFilters();
+    setupTransactionFilters();
     
     // Default states
     updateInventoryLogic('RECEPCIONES');
     updateBranchLogic('SCZ');
     updatePersonnelDetails('reubicados');
-    populateWarehouses();
+    populateTransactions();
     
     // Set default active pills and tabs
-    document.querySelector('#exploration-tabs button[data-tab="inventory"]').click();
-    document.querySelector('#inventory-pills button[data-op="RECEPCIONES"]').classList.replace('inactive-pill', 'active-pill');
+    document.querySelector('#exploration-tabs button[data-tab="logic"]').click();
+    document.querySelector('#logic-pills button[data-logic="inventory"]').click();
+    document.querySelector('#inventory-op-pills button[data-op="RECEPCIONES"]').classList.replace('inactive-pill', 'active-pill');
     
     // Create charts
     createInventoryChart();
