@@ -71,6 +71,22 @@
             background-color: #e2e8f0; /* slate-200 */
             color: #475569; /* slate-600 */
         }
+        #branch-description ul {
+            list-style-position: inside;
+            margin-left: 0;
+            padding-left: 0;
+        }
+        #branch-description li {
+            margin-bottom: 0.5rem;
+        }
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .transaction-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -122,22 +138,24 @@
         <hr class="my-12 border-slate-200">
 
         <section id="exploration" class="mb-16">
-            <h2 class="text-2xl font-bold text-slate-700 mb-2 text-center">Exploración del Flujo de Datos</h2>
-            <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Seleccione una etapa del proceso para ver en detalle cómo se filtran y clasifican los datos. Cada paso es crucial para asegurar la precisión del indicador final.</p>
+            <h2 class="text-2xl font-bold text-slate-700 mb-2 text-center">Análisis Detallado del Proceso</h2>
+            <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Navegue por las pestañas para entender cada componente del script: cómo se clasifica cada transacción, las reglas por sucursal y quiénes son excluidos del cálculo.</p>
             
             <div class="flex justify-center mb-8">
-                <div class="flex space-x-2 p-1 bg-slate-200 rounded-full" id="exploration-tabs">
-                    <button data-tab="inventory" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 active-tab">1. Inventario</button>
-                    <button data-tab="transport" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">2. Transporte</button>
-                    <button data-tab="personnel" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">3. Personal</button>
+                <div class="flex flex-wrap justify-center gap-2 p-1 bg-slate-200 rounded-full" id="exploration-tabs">
+                    <button data-tab="inventory" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 active-tab">Clasificación de Operaciones</button>
+                    <button data-tab="branch-logic" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Lógica por Sucursal</button>
+                    <button data-tab="personnel" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Reglas de Personal</button>
+                    <button data-tab="glossary" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Glosario de Transacciones</button>
                 </div>
             </div>
 
             <div id="tab-content">
+                <!-- Tab 1: Inventory Classification -->
                 <div id="inventory-content">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <h3 class="font-bold text-xl text-slate-700 mb-3">Clasificación de Operaciones de Inventario</h3>
+                            <h3 class="font-bold text-xl text-slate-700 mb-3">¿Cómo sabe el sistema qué es cada movimiento?</h3>
                             <p class="text-slate-600 mb-4">
                                 El paso más crítico es asignar cada transacción a un **Tipo de Operación**. Esto permite medir únicamente los movimientos que generan productividad. Seleccione un tipo de operación para ver la lógica de Qlik que se aplica.
                             </p>
@@ -158,79 +176,90 @@
                     </div>
                 </div>
 
-                <div id="transport-content" class="hidden">
-                     <div class="grid md:grid-cols-2 gap-8 items-center">
-                        <div>
-                            <h3 class="font-bold text-xl text-slate-700 mb-3">Filtrado de Rutas de Transporte (Greenmile)</h3>
-                            <p class="text-slate-600 mb-4">
-                                No todas las rutas registradas en Greenmile son productivas. Se aplican filtros estrictos para excluir eventos anómalos y asegurar que solo se consideren las entregas efectivas. Marque los filtros para ver su impacto.
-                            </p>
-                            <div class="space-y-3" id="transport-filters">
-                                <label class="flex items-center p-3 bg-white rounded-lg shadow-sm border border-slate-200 cursor-pointer hover:bg-slate-50">
-                                    <input type="checkbox" data-filter="test" class="h-5 w-5 rounded border-gray-300 text-sky-600 focus:ring-sky-500">
-                                    <span class="ml-3 text-slate-700">Excluir Rutas de Prueba (TEST, PRUEBA)</span>
-                                </label>
-                                <label class="flex items-center p-3 bg-white rounded-lg shadow-sm border border-slate-200 cursor-pointer hover:bg-slate-50">
-                                    <input type="checkbox" data-filter="contingency" class="h-5 w-5 rounded border-gray-300 text-sky-600 focus:ring-sky-500">
-                                    <span class="ml-3 text-slate-700">Excluir Días de Contingencia (Paros, etc.)</span>
-                                </label>
-                                <label class="flex items-center p-3 bg-white rounded-lg shadow-sm border border-slate-200 cursor-pointer hover:bg-slate-50">
-                                    <input type="checkbox" data-filter="channel" class="h-5 w-5 rounded border-gray-300 text-sky-600 focus:ring-sky-500">
-                                    <span class="ml-3 text-slate-700">Excluir Inconsistencias de Canal</span>
-                                </label>
-                            </div>
+                <!-- Tab 2: Branch Logic -->
+                <div id="branch-logic-content" class="hidden">
+                     <h3 class="font-bold text-xl text-slate-700 mb-3 text-center">¿Por qué cada sucursal tiene reglas diferentes?</h3>
+                     <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Una de las mayores complejidades del script es la identificación de transporte tercerizado, ya que la forma de registrarlo no es la misma en todas partes. Explore las particularidades de cada sucursal.</p>
+                    <div class="flex justify-center mb-8">
+                        <div class="flex space-x-2 p-1 bg-slate-200 rounded-full" id="branch-tabs">
+                            <button data-branch="SCZ" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 active-tab">Santa Cruz (SCZ)</button>
+                            <button data-branch="LPZ" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">La Paz (LPZ)</button>
+                            <button data-branch="CBBA" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Cochabamba (CBBA)</button>
                         </div>
-                        <div class="chart-container">
-                            <canvas id="transportChart"></canvas>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg border border-slate-200 max-w-4xl mx-auto">
+                        <h4 class="font-bold text-lg text-slate-800 mb-2" id="branch-title"></h4>
+                        <div class="text-slate-600 mb-4 space-y-3" id="branch-description"></div>
+                        <div class="mt-6">
+                            <h5 class="font-semibold text-sm text-slate-500 mb-2">Fragmento de Código de Referencia:</h5>
+                            <div class="bg-slate-800 text-white p-4 rounded-lg font-mono text-xs overflow-x-auto">
+                                <pre><code id="branch-logic-code"></code></pre>
+                            </div>
                         </div>
                     </div>
                 </div>
-
+                
+                <!-- Tab 3: Personnel Rules -->
                 <div id="personnel-content" class="hidden">
-                    <div class="grid md:grid-cols-2 gap-8 items-center">
-                        <div>
-                            <h3 class="font-bold text-xl text-slate-700 mb-3">Clasificación de Horas del Personal (TR4)</h3>
-                            <p class="text-slate-600 mb-4">
-                                Para un cálculo preciso, es fundamental descontar las horas del personal que no estuvo involucrado en operaciones productivas. El script identifica a los empleados en condiciones especiales.
-                            </p>
-                            <div class="space-y-4">
-                                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
-                                    <h4 class="font-semibold text-slate-800">Personal Reubicado</h4>
-                                    <p class="text-sm text-slate-600">Empleados que, por diversos motivos, no están en su puesto operativo habitual. Sus horas se marcan para ser analizadas por separado.</p>
-                                </div>
-                                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
-                                    <h4 class="font-semibold text-slate-800">Comisión Sindical</h4>
-                                    <p class="text-sm text-slate-600">Empleados con licencia sindical. Sus horas no se consideran productivas para el cálculo operativo.</p>
-                                </div>
+                    <h3 class="font-bold text-xl text-slate-700 mb-3 text-center">¿Las horas de quiénes se excluyen del cálculo?</h3>
+                    <p class="text-slate-600 mb-8 text-center max-w-3xl mx-auto">
+                        Para calcular la productividad real, necesitamos saber qué horas de trabajo cuentan y cuáles no. El script usa "listas especiales" para excluir las horas de personas que no estaban haciendo trabajo operativo.
+                    </p>
+                    <div class="flex justify-center mb-6">
+                         <div class="flex space-x-2 p-1 bg-slate-200 rounded-full" id="personnel-pills">
+                            <button data-personnel="reubicados" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 active-pill">🧑‍🔧 Reubicados</button>
+                            <button data-personnel="sindicato" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">✊ Sindicato</button>
+                            <button data-personnel="especiales" class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 inactive-pill">⭐ Otras Asignaciones</button>
+                        </div>
+                    </div>
+                    <div id="personnel-details-content" class="grid lg:grid-cols-5 gap-8">
+                        <div class="lg:col-span-3 bg-white p-6 rounded-lg shadow-lg border border-slate-200">
+                            <h4 id="personnel-title" class="font-bold text-lg text-slate-800 mb-2"></h4>
+                            <p id="personnel-description" class="text-slate-600 mb-4"></p>
+                            <div class="table-container border border-slate-200 rounded-md">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="bg-slate-100 text-xs text-slate-700 uppercase sticky top-0">
+                                        <tr>
+                                            <th scope="col" class="px-4 py-3">ID Empleado</th>
+                                            <th scope="col" class="px-4 py-3">Condición</th>
+                                            <th scope="col" class="px-4 py-3">Suc.</th>
+                                            <th scope="col" class="px-4 py-3">Comentarios del Script</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="personnel-table-body" class="divide-y divide-slate-200">
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                        <div class="chart-container">
+                        <div class="lg:col-span-2 chart-container self-center">
                             <canvas id="personnelChart"></canvas>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <hr class="my-12 border-slate-200">
-
-        <section id="branch-logic" class="mb-16">
-            <h2 class="text-2xl font-bold text-slate-700 mb-2 text-center">Lógica Clave por Sucursal</h2>
-            <p class="text-center text-slate-600 mb-8 max-w-3xl mx-auto">Una de las mayores complejidades del script es la identificación de transporte tercerizado, cuyas reglas varían significativamente por sucursal. Explore las particularidades de cada una.</p>
-            
-            <div class="flex justify-center mb-8">
-                <div class="flex space-x-2 p-1 bg-slate-200 rounded-full" id="branch-tabs">
-                    <button data-branch="SCZ" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 active-tab">Santa Cruz (SCZ)</button>
-                    <button data-branch="LPZ" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">La Paz (LPZ)</button>
-                    <button data-branch="CBBA" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Cochabamba (CBBA)</button>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-lg shadow-lg border border-slate-200 max-w-4xl mx-auto">
-                <h3 class="font-bold text-lg text-slate-800 mb-2" id="branch-title"></h3>
-                <p class="text-slate-600 mb-4" id="branch-description"></p>
-                <div class="bg-slate-800 text-white p-4 rounded-lg font-mono text-xs overflow-x-auto">
-                    <pre><code id="branch-logic-code"></code></pre>
+                <!-- Tab 4: Glossary -->
+                <div id="glossary-content" class="hidden">
+                    <h3 class="font-bold text-xl text-slate-700 mb-3 text-center">Glosario Interactivo de Transacciones</h3>
+                    <p class="text-slate-600 mb-8 text-center max-w-3xl mx-auto">
+                        Aquí puedes explorar cada tipo de transacción que existe en el sistema. Usa los filtros para encontrar rápidamente lo que buscas y entender qué hace cada una y quién la origina.
+                    </p>
+                    <div class="mb-6 max-w-2xl mx-auto flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <label for="glossary-filter" class="block text-sm font-medium text-slate-700">Filtrar por Grupo</label>
+                            <select id="glossary-filter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md">
+                                <option value="Todos">Todos los Grupos</option>
+                                <option value="SAP">SAP</option>
+                                <option value="Centro de Distribución">Centro de Distribución</option>
+                            </select>
+                        </div>
+                         <div class="flex-1">
+                            <label for="glossary-search" class="block text-sm font-medium text-slate-700">Buscar por Nombre</label>
+                            <input type="text" id="glossary-search" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md" placeholder="Ej: Sales order issue">
+                        </div>
+                    </div>
+                    <div id="glossary-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Transaction cards will be injected here -->
+                    </div>
                 </div>
             </div>
         </section>
@@ -291,8 +320,15 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         branch: {
             'SCZ': {
-                title: 'Lógica para Santa Cruz (SCZ)',
-                description: 'En Santa Cruz, la identificación de un conductor tercerizado se basa en una combinación del nombre del conductor, la placa del vehículo y el tipo de viaje (DP). Esta es la regla más compleja.',
+                title: 'Lógica para Santa Cruz (SCZ) 🌴',
+                description: `
+                    <p>En Santa Cruz, la regla para saber si un camión es de un tercero es la más estricta. Imagina que para abrir una caja fuerte necesitas una combinación de <strong>TRES</strong> números. Aquí es igual.</p>
+                    <h4 class="font-semibold text-slate-700 mt-4 mb-2">🔍 Cómo funciona la regla:</h4>
+                    <ul>
+                        <li>1. <strong>Se crea una "llave única" 🔑:</strong> El sistema junta tres datos: el <strong>nombre del conductor</strong>, la <strong>placa del vehículo</strong> y el <strong>tipo de viaje</strong> (ej: "RUTAS_H").</li>
+                        <li>2. <strong>Se compara con una lista 📜:</strong> El sistema revisa si esa "llave única" exacta está en una lista especial de transportistas tercerizados conocidos.</li>
+                        <li>3. <strong>Se toma una decisión ✅:</strong> Si la llave está en la lista, el viaje se marca como <strong>"TERCIARIO"</strong>. Si no, se considera de <strong>"SOFIA"</strong>.</li>
+                    </ul>`,
                 code: `If(Match([r.conductorPrincipal]&'-'&SubField([r.codigoRuta],'-',3)&'-'&TIPO_VIAJE_DP,
     'MONTAÑO COLQUE, JESUS EDUARDO-3042AXK-RUTAS_H',
     'ALVARO MAGNE-4540TCA-SECOS',
@@ -301,8 +337,15 @@ document.addEventListener('DOMContentLoaded', () => {
 ),'TERCIARIO', ...)`
             },
             'LPZ': {
-                title: 'Lógica para La Paz (LPZ)',
-                description: 'En La Paz, la regla se simplifica, basándose principalmente en el nombre del conductor y la placa del vehículo, extraída del código de la ruta.',
+                title: 'Lógica para La Paz (LPZ) 🏔️',
+                description: `
+                    <p>En La Paz, la regla es un poco más sencilla. Aquí, la "caja fuerte" solo necesita una combinación de <strong>DOS</strong> números para abrirse.</p>
+                    <h4 class="font-semibold text-slate-700 mt-4 mb-2">🔍 Cómo funciona la regla:</h4>
+                    <ul>
+                        <li>1. <strong>Se crea una "llave" de dos partes 🔑:</strong> El sistema junta el <strong>nombre del conductor</strong> y la <strong>placa del vehículo</strong>.</li>
+                        <li>2. <strong>Se compara con la lista paceña 📜:</strong> Revisa si esa combinación de nombre y placa está en la lista de tercerizados de La Paz.</li>
+                        <li>3. <strong>Se toma una decisión ✅:</strong> Si la combinación está en la lista, se marca como <strong>"TERCIARIO"</strong>. De lo contrario, es de <strong>"SOFIA"</strong>.</li>
+                    </ul>`,
                 code: `If(Match([r.conductorPrincipal]&'-'&SubField([r.codigoRuta],'-',3),
     'ABEL MIXTO INGALI (TC-75820667)-4990TUE',
     'BORIS LAURA-6281CSC',
@@ -311,8 +354,15 @@ document.addEventListener('DOMContentLoaded', () => {
 ),'TERCIARIO', ...)`
             },
             'CBBA': {
-                title: 'Lógica para Cochabamba (CBBA)',
-                description: 'En Cochabamba, la identificación es más directa, utilizando la placa del vehículo y el tipo de viaje (DP), sin depender del nombre del conductor.',
+                title: 'Lógica para Cochabamba (CBBA) ☀️',
+                description: `
+                    <p>En Cochabamba, la regla se enfoca más en el vehículo y la misión que en quién lo maneja. La combinación para la "caja fuerte" es diferente.</p>
+                    <h4 class="font-semibold text-slate-700 mt-4 mb-2">🔍 Cómo funciona la regla:</h4>
+                    <ul>
+                        <li>1. <strong>Se crea una "llave" de vehículo y misión 🔑:</strong> El sistema junta la <strong>placa del vehículo</strong> y el <strong>tipo de viaje</strong> (ej: "SECOS"). ¡El nombre del conductor no importa aquí!</li>
+                        <li>2. <strong>Se compara con la lista cochabambina 📜:</strong> Revisa si esa combinación de placa y tipo de viaje está en la lista de tercerizados de Cochabamba.</li>
+                        <li>3. <strong>Se toma una decisión ✅:</strong> Si la combinación está en la lista, se marca como <strong>"TERCIARIO"</strong>. Si no, es de <strong>"SOFIA"</strong>.</li>
+                    </ul>`,
                 code: `If(Match(SubField([r.codigoRuta],'-',3)& '-' &TIPO_VIAJE_DP,
     '6446BAC-SECOS',
     '6381USA-SECOS',
@@ -320,7 +370,82 @@ document.addEventListener('DOMContentLoaded', () => {
     ...
 ), 'TERCIARIO', 'SOFIA')`
             }
-        }
+        },
+        personnel: {
+            reubicados: {
+                title: "🧑‍🔧 Personal Reubicado",
+                description: "Son personas que, aunque forman parte de la empresa, fueron asignadas temporal o permanentemente a tareas que no se miden en la productividad del almacén. Sus horas se excluyen para no afectar el promedio.",
+                data: [
+                    { id: '617', condition: 'Desde 01/10/2023', branch: 'LPZ', comment: '' },
+                    { id: '28168', condition: '01/01/2024 - 01/01/2025', branch: 'LPZ', comment: 'Fecha opcional, confirmar' },
+                    { id: '11207', condition: '01/07/2022 - 01/01/2025', branch: 'LPZ', comment: '' },
+                    { id: '19155', condition: 'Desde 01/01/2024', branch: 'CBBA', comment: '' },
+                    { id: '22669', condition: 'Desde 01/12/2023', branch: 'SCZ', comment: '' },
+                    { id: '13619', condition: 'Desde 01/04/2025', branch: 'SCZ', comment: 'Validación Mensual' },
+                    { id: '11777', condition: 'Permanente', branch: 'SCZ', comment: '' },
+                    { id: '20223', condition: 'Desde 30/09/2023', branch: 'SCZ', comment: '' }
+                ]
+            },
+            sindicato: {
+                title: "✊ Comisión Sindical",
+                description: "Son personas que están en comisión sindical. Por ley, su tiempo se dedica a actividades del sindicato, por lo que sus horas no se cuentan como trabajo operativo.",
+                data: [
+                    { id: '1116', condition: 'Desde 01/09/2023', branch: 'LPZ', comment: '' },
+                    { id: '14364', condition: 'Desde 01/09/2021', branch: 'LPZ', comment: '' },
+                    { id: '3292', condition: 'Desde 01/10/2023', branch: 'LPZ', comment: '' },
+                    { id: '22798', condition: 'Excepción', branch: 'LPZ', comment: 'Sindicalista que sí trabaja' },
+                    { id: '8754', condition: 'Excepción', branch: 'SCZ', comment: 'Sindicalista que sí trabaja' }
+                ]
+            },
+            especiales: {
+                title: "⭐ Otras Asignaciones Especiales",
+                description: "Son casos particulares donde a una persona se le cambia su 'Área' o 'Sección' directamente en el script para corregir o ajustar su registro en el sistema.",
+                data: [
+                    { id: '105', condition: "Sección -> 'ALMACEN.SECOS.SCZ'", branch: 'SCZ', comment: '¿Modificar historial?' },
+                    { id: '16113', condition: "Sección -> 'ALMACEN.SECOS.SCZ'", branch: 'SCZ', comment: '¿Modificar historial?' },
+                    { id: '20223', condition: "Sección -> 'ALMACENAJE HUEVO SCZ'", branch: 'SCZ', comment: 'Desde 30/09/2023' },
+                    { id: 'Varios', condition: "Área -> 'STAFF GDN'", branch: 'Todas', comment: 'Aplica a todos los reubicados' }
+                ]
+            }
+        },
+        transactions: [
+            { group: 'SAP', type: 'Direct Org Transfer', alias: false, detail: 'Transferencia directa entre organizaciones', origin: 'Personal de SAP' },
+            { group: 'SAP', type: 'Int Req Intr Rcpt', alias: false, detail: 'Recepción de pedido interno de abastecimiento', origin: 'Personal de SAP' },
+            { group: 'SAP', type: 'Intransit Receipt', alias: false, detail: 'Recepción de transferencia en dos pasos', origin: 'Personal de SAP' },
+            { group: 'SAP', type: 'Miscellaneous issue', alias: true, detail: 'Salida miscelánea, normalmente, ventas (alias VMEN, VSOM, CONS, VBILL)', origin: 'EBS - Venta directa en SAP' },
+            { group: 'SAP', type: 'Miscellaneous receipt', alias: true, detail: 'Ingreso misceláneo, normalmente, anulación de ventas (alias VMEN, VSOM, CONS, VBILL)', origin: 'EBS - Reversión de venta dentro de los 5 mins en SAP' },
+            { group: 'SAP', type: 'PO Receipt', alias: false, detail: 'Recepción de OC', origin: 'Personal de SAP' },
+            { group: 'SAP', type: 'Residual Qty issue', alias: false, detail: 'Ajuste de salida automático de sistema, CANTIDAD RESIDUAL', origin: 'EBS' },
+            { group: 'SAP', type: 'Residual Qty Receipt', alias: false, detail: 'Ajuste de ingreso automático de sistema, CANTIDAD RESIDUAL', origin: 'EBS' },
+            { group: 'SAP', type: 'Return to Vendor', alias: false, detail: 'Reversión de OC', origin: 'Personal de SAP' },
+            { group: 'SAP', type: 'TRANSACCIONES DE INGRESO', alias: true, detail: 'Transacción Manual de Ingreso con motivo alias (disponible con los alias configurados en cada SAP)', origin: 'Ejecutado por los operadores por solicitud de SAP' },
+            { group: 'SAP', type: 'TRANSACCIONES DE SALIDA', alias: true, detail: 'Transacción Manual de Salida con motivo alias (disponible con los alias configurados en cada SAP)', origin: 'Ejecutado por los operadores por solicitud de SAP' },
+            { group: 'SAP', type: 'Transferencia Org 2 Pasos', alias: true, detail: 'Transferencia en dos pasos', origin: 'Ejecutado por los operadores por solicitud de SAP' },
+            { group: 'Centro de Distribución', type: 'Account alias issue', alias: true, detail: 'Transacción de salida POR DISPOSITIVO (alias ALEE, AASB, DIF, DICC, TRCC, TRLT, etc) (C23 y W04)', origin: 'Ejecutado por pantalla de TELNET o DISPOSITIVO' },
+            { group: 'Centro de Distribución', type: 'Account alias receipt', alias: true, detail: 'Transacción de ingreso POR DISPOSITIVO (alias ALEE, AASB, DIF, DIFI, MERN, etc) (C23 y W04)', origin: 'Ejecutado por pantalla de TELNET o DISPOSITIVO' },
+            { group: 'Centro de Distribución', type: 'Container Pack', alias: false, detail: 'Embalado en LPN (W04)', origin: 'Ejecutado por pantalla de TELNET o DISPOSITIVO' },
+            { group: 'Centro de Distribución', type: 'Container Split', alias: false, detail: 'Fraccionado de un LPN (W04)', origin: 'Ejecutado por pantalla de TELNET o DISPOSITIVO' },
+            { group: 'Centro de Distribución', type: 'Container Unpack', alias: false, detail: 'Desembalado de LPN (W04)', origin: 'Ejecutado por pantalla de TELNET o DISPOSITIVO' },
+            { group: 'Centro de Distribución', type: 'Direct Org Transfer', alias: false, detail: 'Transferencia directa entre organizaciones', origin: 'Ejecutado por Operadores o DP' },
+            { group: 'Centro de Distribución', type: 'Int Order Intr Ship', alias: false, detail: 'Salida de CD por pedido interno de abastecimiento', origin: 'Se genera por movimientos de abastecimiento por pedido interno' },
+            { group: 'Centro de Distribución', type: 'Intransit Receipt', alias: false, detail: 'Recepción de Transferencia a 2 Pasos', origin: 'Ejecutado por DP o INV' },
+            { group: 'Centro de Distribución', type: 'Move Order Transfer', alias: false, detail: 'Movimiento entre localizadores', origin: 'Ejecutado por pantalla de TELNET o DISPOSITIVO' },
+            { group: 'Centro de Distribución', type: 'PO Receipt', alias: false, detail: 'Recepción de OC', origin: 'Ejecutado por INV' },
+            { group: 'Centro de Distribución', type: 'Residual Qty issue', alias: false, detail: 'Ajuste de salida automática de sistema, CANTIDAD RESIDUAL', origin: 'Automático de sistema' },
+            { group: 'Centro de Distribución', type: 'Residual Qty Receipt', alias: false, detail: 'Ajuste de ingreso automático de sistema, CANTIDAD RESIDUAL', origin: 'Automático de sistema' },
+            { group: 'Centro de Distribución', type: 'RMA Receipt', alias: false, detail: 'Recepción de DEVOLUCIÓN (DEVOLUCIONES, DEVOLUCION NT JURIDICA, DEVOLUCION ABIERTA, DEVOLUCION DONACION, ETC)', origin: 'Ejecutado por Operadores' },
+            { group: 'Centro de Distribución', type: 'Sales order issue', alias: false, detail: 'Salida por pedido registrado (puede ser VENTA, DONACION, SALIDA PREMIO CLIENTE INTERNO, etc)', origin: 'Se genera por movimientos de salida por pedidos comerciales' },
+            { group: 'Centro de Distribución', type: 'Salida Ventas CS', alias: true, detail: 'Baja de Stock de CS por compra ejecutada por SOFIA (SOLO USA ESE MOTIVO ALIAS)', origin: 'Automático de sistema' },
+            { group: 'Centro de Distribución', type: 'Subinventory Transfer', alias: false, detail: 'Movimiento entre subinventarios', origin: 'Ejecutado por pantalla de TELNET o DISPOSITIVO' },
+            { group: 'Centro de Distribución', type: 'TRANSACCIONES DE INGRESO', alias: true, detail: 'Transacción Manual de Ingreso con motivo alias (disponible con los alias configurados en cada ORGANIZACIÓN)', origin: 'Ejecutado por Operadores' },
+            { group: 'Centro de Distribución', type: 'TRANSACCIONES DE SALIDA', alias: true, detail: 'Transacción Manual de Salida con motivo alias (disponible con los alias configurados en cada ORGANIZACIÓN)', origin: 'Ejecutado por Operadores' },
+            { group: 'Centro de Distribución', type: 'Transfer to Regular', alias: false, detail: 'Actualización de informe al acuerdo de Custodia con CS, no genera un movimiento real de kilos, son líneas que se testean', origin: 'Automático de sistema' },
+            { group: 'Centro de Distribución', type: 'Transferencia Org 2 Pasos', alias: false, detail: 'Transferencia a dos pasos entre Organizaciones', origin: 'Ejecutado por Operadores' },
+            { group: 'Centro de Distribución', type: 'Transferencia Subinv Directa', alias: false, detail: 'Transferencia entre subinventarios directa', origin: 'Ejecutado por Operadores' },
+            { group: 'Centro de Distribución', type: 'Reversion salida venta CS', alias: true, detail: 'Ingreso de Stock de CS por reversión compra ejecutada por SOFIA (SOLO USA ESE MOTIVO ALIAS)', origin: 'Automático de sistema' },
+            { group: 'Centro de Distribución', type: 'Logical Intransit Receipt', alias: false, detail: 'Movimiento virtual, nativo de EBS, no debe tomarse en cuenta', origin: 'Automático de sistema' },
+            { group: 'Centro de Distribución', type: 'Return to Vendor', alias: false, detail: 'Reversión de OC', origin: 'Ejecutado por Operadores' }
+        ]
     };
 
     let inventoryChart, transportChart, personnelChart;
@@ -380,6 +505,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    const setupPersonnelPills = () => {
+        const pillsContainer = document.getElementById('personnel-pills');
+        pillsContainer.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const personnelType = e.target.dataset.personnel;
+                updatePersonnelDetails(personnelType);
+                
+                Array.from(pillsContainer.children).forEach(button => {
+                   button.classList.replace('active-pill', 'inactive-pill');
+                });
+                e.target.classList.replace('inactive-pill', 'active-pill');
+            }
+        });
+    };
+
     const updateInventoryLogic = (op) => {
         document.getElementById('inventory-logic').textContent = logicData.inventory[op];
     };
@@ -387,12 +527,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateBranchLogic = (branch) => {
         const data = logicData.branch[branch];
         document.getElementById('branch-title').textContent = data.title;
-        document.getElementById('branch-description').textContent = data.description;
+        document.getElementById('branch-description').innerHTML = data.description;
         document.getElementById('branch-logic-code').textContent = data.code;
+    };
+
+    const updatePersonnelDetails = (type) => {
+        const details = logicData.personnel[type];
+        document.getElementById('personnel-title').textContent = details.title;
+        document.getElementById('personnel-description').textContent = details.description;
+        
+        const tableBody = document.getElementById('personnel-table-body');
+        tableBody.innerHTML = '';
+        details.data.forEach(item => {
+            const row = `
+                <tr class="bg-white hover:bg-slate-50">
+                    <td class="px-4 py-3 font-medium text-slate-900">${item.id}</td>
+                    <td class="px-4 py-3">${item.condition}</td>
+                    <td class="px-4 py-3"><span class="bg-sky-100 text-sky-800 text-xs font-medium px-2 py-0.5 rounded">${item.branch}</span></td>
+                    <td class="px-4 py-3 text-slate-500 italic">${item.comment || '-'}</td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
     };
     
     const createInventoryChart = () => {
         const ctx = document.getElementById('inventoryChart').getContext('2d');
+        if (inventoryChart) inventoryChart.destroy();
         inventoryChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
@@ -426,73 +587,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const updateInventoryChartHighlight = (index) => {
+        if (!inventoryChart) return;
         inventoryChart.options.plugins.legend.onClick(null, inventoryChart.legend.legendItems[index]);
         inventoryChart.update();
     };
 
-    const createTransportChart = () => {
-        const ctx = document.getElementById('transportChart').getContext('2d');
-        transportChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Rutas'],
-                datasets: [{
-                    label: 'Rutas Productivas',
-                    data: [85],
-                    backgroundColor: '#10b981',
-                }, {
-                    label: 'Rutas Descartadas',
-                    data: [15],
-                    backgroundColor: '#ef4444',
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                scales: {
-                    x: {
-                        stacked: true,
-                        max: 100,
-                        ticks: {
-                            callback: (value) => value + '%'
-                        }
-                    },
-                    y: {
-                        stacked: true,
-                    }
-                },
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom' },
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => `${context.dataset.label}: ${context.raw}%`
-                        }
-                    }
-                }
-            }
-        });
-    };
-    
-    const updateTransportChart = () => {
-        const filters = document.querySelectorAll('#transport-filters input:checked');
-        let discarded = 15;
-        filters.forEach(filter => {
-            if (filter.dataset.filter === 'test') discarded += 5;
-            if (filter.dataset.filter === 'contingency') discarded += 8;
-            if (filter.dataset.filter === 'channel') discarded += 3;
-        });
-        
-        discarded = Math.min(discarded, 60);
-        const productive = 100 - discarded;
-        
-        transportChart.data.datasets[0].data[0] = productive;
-        transportChart.data.datasets[1].data[0] = discarded;
-        transportChart.update();
-    };
-
     const createPersonnelChart = () => {
         const ctx = document.getElementById('personnelChart').getContext('2d');
+        if (personnelChart) personnelChart.destroy();
         personnelChart = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -540,18 +642,73 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    const populateGlossary = (filterGroup = 'Todos', searchTerm = '') => {
+        const container = document.getElementById('glossary-container');
+        container.innerHTML = '';
+        const filteredTransactions = logicData.transactions.filter(t => {
+            const groupMatch = filterGroup === 'Todos' || t.group === filterGroup;
+            const searchTermMatch = searchTerm === '' || t.type.toLowerCase().includes(searchTerm.toLowerCase());
+            return groupMatch && searchTermMatch;
+        });
+
+        if (filteredTransactions.length === 0) {
+            container.innerHTML = `<p class="text-slate-500 col-span-full text-center">No se encontraron transacciones que coincidan con los filtros.</p>`;
+            return;
+        }
+
+        filteredTransactions.forEach(t => {
+            const card = `
+                <div class="bg-white p-4 rounded-lg shadow-md border border-slate-200 transaction-card transition-all duration-200">
+                    <div class="flex justify-between items-start">
+                        <h4 class="font-bold text-slate-800">${t.type}</h4>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${t.group === 'SAP' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">${t.group}</span>
+                    </div>
+                    <p class="text-sm text-slate-600 mt-2">${t.detail}</p>
+                    <div class="mt-4 pt-3 border-t border-slate-200 text-xs space-y-2">
+                        <p><strong class="font-semibold text-slate-700">Origen:</strong> ${t.origin}</p>
+                        <p><strong class="font-semibold text-slate-700">Requiere Alias:</strong> ${t.alias ? '<span class="text-red-600 font-bold">Sí</span>' : 'No'}</p>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += card;
+        });
+    };
+
+    const setupGlossaryFilters = () => {
+        const filterSelect = document.getElementById('glossary-filter');
+        const searchInput = document.getElementById('glossary-search');
+
+        const applyFilters = () => {
+            const group = filterSelect.value;
+            const search = searchInput.value;
+            populateGlossary(group, search);
+        };
+
+        filterSelect.addEventListener('change', applyFilters);
+        searchInput.addEventListener('input', applyFilters);
+    };
+
+    // Initial Setup
     setupExplorationTabs();
     setupBranchTabs();
     setupInventoryPills();
+    setupPersonnelPills();
+    setupGlossaryFilters();
     
+    // Default states
     updateInventoryLogic('RECEPCIONES');
     updateBranchLogic('SCZ');
+    updatePersonnelDetails('reubicados');
+    populateGlossary();
     
+    // Set default active pills and tabs
+    document.querySelector('#exploration-tabs button[data-tab="inventory"]').click();
+    document.querySelector('#inventory-pills button[data-op="RECEPCIONES"]').classList.replace('inactive-pill', 'active-pill');
+    
+    // Create charts
     createInventoryChart();
-    createTransportChart();
     createPersonnelChart();
-    
-    document.getElementById('transport-filters').addEventListener('change', updateTransportChart);
+
 });
 </script>
 
