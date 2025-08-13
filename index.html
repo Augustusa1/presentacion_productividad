@@ -155,9 +155,9 @@
             <div class="flex justify-center mb-8">
                 <div class="flex flex-wrap justify-center gap-2 p-1 bg-slate-200 rounded-full" id="exploration-tabs">
                     <button data-tab="inventory" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 active-tab">Clasificación de Operaciones</button>
+                    <button data-tab="warehouses" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Análisis de Almacenes</button>
                     <button data-tab="branch-logic" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Lógica por Sucursal</button>
                     <button data-tab="personnel" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Reglas de Personal</button>
-                    <button data-tab="glossary" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Glosario de Transacciones</button>
                     <button data-tab="full-code" class="px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 inactive-tab">Código y Anotaciones</button>
                 </div>
             </div>
@@ -249,28 +249,71 @@
                     </div>
                 </div>
 
-                <!-- Tab 4: Glossary -->
-                <div id="glossary-content" class="hidden">
-                    <h3 class="font-bold text-xl text-slate-700 mb-3 text-center">Glosario Interactivo de Transacciones</h3>
+                <!-- Tab 4: Warehouse Analysis -->
+                <div id="warehouses-content" class="hidden">
+                    <h3 class="font-bold text-xl text-slate-700 mb-3 text-center">Análisis de Almacenes y Transacciones Clave</h3>
                     <p class="text-slate-600 mb-8 text-center max-w-3xl mx-auto">
-                        Aquí puedes explorar cada tipo de transacción que existe en el sistema. Usa los filtros para encontrar rápidamente lo que buscas y entender qué hace cada una y quién la origina.
+                        El maestro de almacenes nos permite entender el rol de cada ubicación. Aquí podemos ver cómo interactúan y qué transacciones son vitales para la operación entre ellos.
                     </p>
-                    <div class="mb-6 max-w-2xl mx-auto flex flex-col sm:flex-row gap-4">
-                        <div class="flex-1">
-                            <label for="glossary-filter" class="block text-sm font-medium text-slate-700">Filtrar por Grupo</label>
-                            <select id="glossary-filter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md">
-                                <option value="Todos">Todos los Grupos</option>
-                                <option value="SAP">SAP</option>
-                                <option value="Centro de Distribución">Centro de Distribución</option>
-                            </select>
-                        </div>
-                         <div class="flex-1">
-                            <label for="glossary-search" class="block text-sm font-medium text-slate-700">Buscar por Nombre</label>
-                            <input type="text" id="glossary-search" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md" placeholder="Ej: Sales order issue">
+                    <div class="bg-white p-6 rounded-lg shadow-lg border border-slate-200 mb-8">
+                        <h4 class="font-bold text-lg text-slate-800 mb-4">Anatomía de las Transferencias</h4>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Transfer Card 1 -->
+                            <div class="border border-slate-200 p-4 rounded-lg">
+                                <h5 class="font-semibold text-slate-700">Direct Org Transfer</h5>
+                                <p class="text-sm text-slate-600">Mueve producto entre dos "organizaciones" o centros de distribución principales. Es una operación logística clave para balancear inventario a nivel nacional.</p>
+                                <div class="mt-2 text-center p-2 bg-slate-50 rounded-md">
+                                    <div class="font-semibold">CD SCZ (C43) ➔ CD LPZ (C42)</div>
+                                    <div class="text-xs text-slate-500">Ejecutado por: Operadores o DP</div>
+                                </div>
+                            </div>
+                             <!-- Transfer Card 2 -->
+                            <div class="border border-slate-200 p-4 rounded-lg">
+                                <h5 class="font-semibold text-slate-700">Transferencia Org 2 Pasos</h5>
+                                <p class="text-sm text-slate-600">Similar a la anterior, pero requiere una confirmación de recepción (`Intransit Receipt`). El producto está "en tránsito" hasta que el destino confirma su llegada.</p>
+                                <div class="mt-2 text-center p-2 bg-slate-50 rounded-md">
+                                    <div class="font-semibold">CD CBBA (C31) ➔ CD Tarija (C10)</div>
+                                    <div class="text-xs text-slate-500">Ejecutado por: Operadores</div>
+                                </div>
+                            </div>
+                             <!-- Transfer Card 3 -->
+                            <div class="border border-slate-200 p-4 rounded-lg">
+                                <h5 class="font-semibold text-slate-700">Int Order Intr Ship</h5>
+                                <p class="text-sm text-slate-600">Es la salida de un CD para abastecer a otro almacén, que puede ser otro CD o una agencia comercial. Es el inicio de una transferencia interna.</p>
+                                <div class="mt-2 text-center p-2 bg-slate-50 rounded-md">
+                                    <div class="font-semibold">CD SCZ (C43) ➔ Agencia Grigota (A01)</div>
+                                    <div class="text-xs text-slate-500">Origen: Pedido Interno</div>
+                                </div>
+                            </div>
+                             <!-- Transfer Card 4 -->
+                            <div class="border border-slate-200 p-4 rounded-lg">
+                                <h5 class="font-semibold text-slate-700">Subinventory Transfer</h5>
+                                <p class="text-sm text-slate-600">Movimiento DENTRO del mismo CD. No sale del edificio, solo cambia de área (ej: de un área de recepción a una de picking o despacho).</p>
+                                <div class="mt-2 text-center p-2 bg-slate-50 rounded-md">
+                                    <div class="font-semibold">Dentro de CD SCZ (C43): Área '07' ➔ Área '01'</div>
+                                    <div class="text-xs text-slate-500">Ejecutado por: TELNET / Operadores</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div id="glossary-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Transaction cards will be injected here -->
+
+                    <h4 class="font-bold text-lg text-slate-800 mb-4 text-center">Glosario de Almacenes</h4>
+                    <div class="mb-6 max-w-4xl mx-auto grid sm:grid-cols-3 gap-4">
+                        <div>
+                            <label for="warehouse-filter-suc" class="block text-sm font-medium text-slate-700">Filtrar por Sucursal</label>
+                            <select id="warehouse-filter-suc" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md"></select>
+                        </div>
+                        <div>
+                            <label for="warehouse-filter-group" class="block text-sm font-medium text-slate-700">Filtrar por Grupo</label>
+                            <select id="warehouse-filter-group" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md"></select>
+                        </div>
+                         <div>
+                            <label for="warehouse-search" class="block text-sm font-medium text-slate-700">Buscar por Nombre o Código</label>
+                            <input type="text" id="warehouse-search" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-sky-500 focus:border-sky-500 sm:text-sm rounded-md" placeholder="Ej: Grigota o A01">
+                        </div>
+                    </div>
+                    <div id="warehouse-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Warehouse cards will be injected here -->
                     </div>
                 </div>
 
@@ -575,43 +618,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 ]
             }
         },
-        transactions: [
-            { group: 'SAP', type: 'Direct Org Transfer', alias: false, detail: 'Transferencia directa entre organizaciones', origin: 'Personal de SAP' },
-            { group: 'SAP', type: 'Int Req Intr Rcpt', alias: false, detail: 'Recepción de pedido interno de abastecimiento', origin: 'Personal de SAP' },
-            { group: 'SAP', type: 'Intransit Receipt', alias: false, detail: 'Recepción de transferencia en dos pasos', origin: 'Personal de SAP' },
-            { group: 'SAP', type: 'Miscellaneous issue', alias: true, detail: 'Salida miscelánea, normalmente, ventas (alias VMEN, VSOM, CONS, VBILL)', origin: 'EBS - Venta directa en SAP' },
-            { group: 'SAP', type: 'Miscellaneous receipt', alias: true, detail: 'Ingreso misceláneo, normalmente, anulación de ventas (alias VMEN, VSOM, CONS, VBILL)', origin: 'EBS - Reversión de venta dentro de los 5 mins en SAP' },
-            { group: 'SAP', type: 'PO Receipt', alias: false, detail: 'Recepción de OC', origin: 'Personal de SAP' },
-            { group: 'SAP', type: 'Residual Qty issue', alias: false, detail: 'Ajuste de salida automático de sistema, CANTIDAD RESIDUAL', origin: 'EBS' },
-            { group: 'SAP', type: 'Residual Qty Receipt', alias: false, detail: 'Ajuste de ingreso automático de sistema, CANTIDAD RESIDUAL', origin: 'EBS' },
-            { group: 'SAP', type: 'Return to Vendor', alias: false, detail: 'Reversión de OC', origin: 'Personal de SAP' },
-            { group: 'SAP', type: 'TRANSACCIONES DE INGRESO', alias: true, detail: 'Transacción Manual de Ingreso con motivo alias (disponible con los alias configurados en cada SAP)', origin: 'Ejecutado por los operadores por solicitud de SAP' },
-            { group: 'SAP', type: 'TRANSACCIONES DE SALIDA', alias: true, detail: 'Transacción Manual de Salida con motivo alias (disponible con los alias configurados en cada SAP)', origin: 'Ejecutado por los operadores por solicitud de SAP' },
-            { group: 'SAP', type: 'Transferencia Org 2 Pasos', alias: true, detail: 'Transferencia en dos pasos', origin: 'Ejecutado por los operadores por solicitud de SAP' },
-            { group: 'Centro de Distribución', type: 'Account alias issue', alias: true, detail: 'Transacción de salida POR DISPOSITIVO (alias ALEE, AASB, DIF, DICC, TRCC, TRLT, etc) (C23 y W04)', origin: 'Ejecutado por pantalla de TELNET o DISPOSITIVO' },
-            { group: 'Centro de Distribución', type: 'Account alias receipt', alias: true, detail: 'Transacción de ingreso POR DISPOSITIVO (alias ALEE, AASB, DIF, DIFI, MERN, etc) (C23 y W04)', origin: 'Ejecutado por pantalla de TELNET o DISPOSITIVO' },
-            { group: 'Centro de Distribución', type: 'Container Pack', alias: false, detail: 'Embalado en LPN (W04)', origin: 'Ejecutado por pantalla de TELNET o DISPOSITIVO' },
-            { group: 'Centro de Distribución', type: 'Container Split', alias: false, detail: 'Fraccionado de un LPN (W04)', origin: 'Ejecutado por pantalla de TELNET o DISPOSITIVO' },
-            { group: 'Centro de Distribución', type: 'Container Unpack', alias: false, detail: 'Desembalado de LPN (W04)', origin: 'Ejecutado por pantalla de TELNET o DISPOSITIVO' },
-            { group: 'Centro de Distribución', type: 'Direct Org Transfer', alias: false, detail: 'Transferencia directa entre organizaciones', origin: 'Ejecutado por Operadores o DP' },
-            { group: 'Centro de Distribución', type: 'Int Order Intr Ship', alias: false, detail: 'Salida de CD por pedido interno de abastecimiento', origin: 'Se genera por movimientos de abastecimiento por pedido interno' },
-            { group: 'Centro de Distribución', type: 'Intransit Receipt', alias: false, detail: 'Recepción de Transferencia a 2 Pasos', origin: 'Ejecutado por DP o INV' },
-            { group: 'Centro de Distribución', type: 'Move Order Transfer', alias: false, detail: 'Movimiento entre localizadores', origin: 'Ejecutado por pantalla de TELNET o DISPOSITIVO' },
-            { group: 'Centro de Distribución', type: 'PO Receipt', alias: false, detail: 'Recepción de OC', origin: 'Ejecutado por INV' },
-            { group: 'Centro de Distribución', type: 'Residual Qty issue', alias: false, detail: 'Ajuste de salida automática de sistema, CANTIDAD RESIDUAL', origin: 'Automático de sistema' },
-            { group: 'Centro de Distribución', type: 'Residual Qty Receipt', alias: false, detail: 'Ajuste de ingreso automático de sistema, CANTIDAD RESIDUAL', origin: 'Automático de sistema' },
-            { group: 'Centro de Distribución', type: 'RMA Receipt', alias: false, detail: 'Recepción de DEVOLUCIÓN (DEVOLUCIONES, DEVOLUCION NT JURIDICA, DEVOLUCION ABIERTA, DEVOLUCION DONACION, ETC)', origin: 'Ejecutado por Operadores' },
-            { group: 'Centro de Distribución', type: 'Sales order issue', alias: false, detail: 'Salida por pedido registrado (puede ser VENTA, DONACION, SALIDA PREMIO CLIENTE INTERNO, etc)', origin: 'Se genera por movimientos de salida por pedidos comerciales' },
-            { group: 'Centro de Distribución', type: 'Salida Ventas CS', alias: true, detail: 'Baja de Stock de CS por compra ejecutada por SOFIA (SOLO USA ESE MOTIVO ALIAS)', origin: 'Automático de sistema' },
-            { group: 'Centro de Distribución', type: 'Subinventory Transfer', alias: false, detail: 'Movimiento entre subinventarios', origin: 'Ejecutado por pantalla de TELNET o DISPOSITIVO' },
-            { group: 'Centro de Distribución', type: 'TRANSACCIONES DE INGRESO', alias: true, detail: 'Transacción Manual de Ingreso con motivo alias (disponible con los alias configurados en cada ORGANIZACIÓN)', origin: 'Ejecutado por Operadores' },
-            { group: 'Centro de Distribución', type: 'TRANSACCIONES DE SALIDA', alias: true, detail: 'Transacción Manual de Salida con motivo alias (disponible con los alias configurados en cada ORGANIZACIÓN)', origin: 'Ejecutado por Operadores' },
-            { group: 'Centro de Distribución', type: 'Transfer to Regular', alias: false, detail: 'Actualización de informe al acuerdo de Custodia con CS, no genera un movimiento real de kilos, son líneas que se testean', origin: 'Automático de sistema' },
-            { group: 'Centro de Distribución', type: 'Transferencia Org 2 Pasos', alias: false, detail: 'Transferencia a dos pasos entre Organizaciones', origin: 'Ejecutado por Operadores' },
-            { group: 'Centro de Distribución', type: 'Transferencia Subinv Directa', alias: false, detail: 'Transferencia entre subinventarios directa', origin: 'Ejecutado por Operadores' },
-            { group: 'Centro de Distribución', type: 'Reversion salida venta CS', alias: true, detail: 'Ingreso de Stock de CS por reversión compra ejecutada por SOFIA (SOLO USA ESE MOTIVO ALIAS)', origin: 'Automático de sistema' },
-            { group: 'Centro de Distribución', type: 'Logical Intransit Receipt', alias: false, detail: 'Movimiento virtual, nativo de EBS, no debe tomarse en cuenta', origin: 'Automático de sistema' },
-            { group: 'Centro de Distribución', type: 'Return to Vendor', alias: false, detail: 'Reversión de OC', origin: 'Ejecutado por Operadores' }
+        warehouses: [
+            { ALMACEN: 'A01', ORGANIZATION_ID: '1024', ALMACEN_DESCRIPCION: 'A01: Almacén Micromercado Grigota - SCZ', GRUPO_ORGANIZACIONES: 'DISTRIBUCION', SUC: 'SCZ.', Almacen_Agrupador: 'SOFIA AL PASO' },
+            { ALMACEN: 'A03', ORGANIZATION_ID: '1865', ALMACEN_DESCRIPCION: 'A03: VENTAS MENORES SCZ PLAN 3000', GRUPO_ORGANIZACIONES: 'DISTRIBUCION', SUC: 'SCZ.', Almacen_Agrupador: 'VENTAS MENORES' },
+            { ALMACEN: 'A04', ORGANIZATION_ID: '1044', ALMACEN_DESCRIPCION: 'A04: Almacén Micromercado Mutualista - SCZ', GRUPO_ORGANIZACIONES: 'DISTRIBUCION', SUC: 'SCZ.', Almacen_Agrupador: 'SOFIA AL PASO' },
+            { ALMACEN: 'A05', ORGANIZATION_ID: '1045', ALMACEN_DESCRIPCION: 'A05: Almacén Micromercado Santos Dumont - SCZ', GRUPO_ORGANIZACIONES: 'DISTRIBUCION', SUC: 'SCZ.', Almacen_Agrupador: 'SOFIA AL PASO' },
+            { ALMACEN: 'C42', ORGANIZATION_ID: '365', ALMACEN_DESCRIPCION: 'C42: Centro de Distribución LPZ', GRUPO_ORGANIZACIONES: 'DISTRIBUCION', SUC: 'LP-EA.', Almacen_Agrupador: 'CD' },
+            { ALMACEN: 'C43', ORGANIZATION_ID: '1645', ALMACEN_DESCRIPCION: 'C43: Centro de Distribución SCZ', GRUPO_ORGANIZACIONES: 'DISTRIBUCION', SUC: 'SCZ.', Almacen_Agrupador: 'CD' },
+            { ALMACEN: 'C31', ORGANIZATION_ID: '380', ALMACEN_DESCRIPCION: 'C31: Centro de Distribución CBBA', GRUPO_ORGANIZACIONES: 'DISTRIBUCION', SUC: 'CBBA.', Almacen_Agrupador: 'CD' },
+            { ALMACEN: 'P24', ORGANIZATION_ID: '364', ALMACEN_DESCRIPCION: 'P24: Almacén de Producción', GRUPO_ORGANIZACIONES: 'PRODUCCION', SUC: 'SCZ.', Almacen_Agrupador: 'PRODUCCION' },
+            { ALMACEN: 'C10', ORGANIZATION_ID: '1103', ALMACEN_DESCRIPCION: 'C10: CD Tarija', GRUPO_ORGANIZACIONES: 'DISTRIBUCION', SUC: 'TJA.', Almacen_Agrupador: 'CD' },
+            { ALMACEN: 'C20', ORGANIZATION_ID: '4565', ALMACEN_DESCRIPCION: 'C20: CD Sucre', GRUPO_ORGANIZACIONES: 'DISTRIBUCION', SUC: 'SUC.', Almacen_Agrupador: 'CD' },
+            { ALMACEN: 'C40', ORGANIZATION_ID: '4585', ALMACEN_DESCRIPCION: 'C40: CD Potosi', GRUPO_ORGANIZACIONES: 'DISTRIBUCION', SUC: 'PSI.', Almacen_Agrupador: 'CD' },
+            { ALMACEN: 'C41', ORGANIZATION_ID: '4685', ALMACEN_DESCRIPCION: 'C41: CD El Alto', GRUPO_ORGANIZACIONES: 'DISTRIBUCION', SUC: 'LP-EA.', Almacen_Agrupador: 'CD' },
+            { ALMACEN: 'W04', ORGANIZATION_ID: '1799', ALMACEN_DESCRIPCION: 'W04: CD Warnes', GRUPO_ORGANIZACIONES: 'DISTRIBUCION', SUC: 'SCZ.', Almacen_Agrupador: 'CD' }
         ]
     };
 
@@ -809,31 +829,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const populateGlossary = (filterGroup = 'Todos', searchTerm = '') => {
-        const container = document.getElementById('glossary-container');
+    const populateWarehouseFilters = () => {
+        const sucFilter = document.getElementById('warehouse-filter-suc');
+        const groupFilter = document.getElementById('warehouse-filter-group');
+        
+        const sucs = [...new Set(logicData.warehouses.map(w => w.SUC))].sort();
+        const groups = [...new Set(logicData.warehouses.map(w => w.GRUPO_ORGANIZACIONES))].sort();
+
+        sucFilter.innerHTML = '<option value="Todos">Todas las Sucursales</option>';
+        sucs.forEach(s => sucFilter.innerHTML += `<option value="${s}">${s}</option>`);
+
+        groupFilter.innerHTML = '<option value="Todos">Todos los Grupos</option>';
+        groups.forEach(g => groupFilter.innerHTML += `<option value="${g}">${g}</option>`);
+    };
+
+    const populateWarehouses = (filterSuc = 'Todos', filterGroup = 'Todos', searchTerm = '') => {
+        const container = document.getElementById('warehouse-container');
         container.innerHTML = '';
-        const filteredTransactions = logicData.transactions.filter(t => {
-            const groupMatch = filterGroup === 'Todos' || t.group === filterGroup;
-            const searchTermMatch = searchTerm === '' || t.type.toLowerCase().includes(searchTerm.toLowerCase());
-            return groupMatch && searchTermMatch;
+        const filtered = logicData.warehouses.filter(w => {
+            const sucMatch = filterSuc === 'Todos' || w.SUC === filterSuc;
+            const groupMatch = filterGroup === 'Todos' || w.GRUPO_ORGANIZACIONES === filterGroup;
+            const termMatch = searchTerm === '' || w.ALMACEN.toLowerCase().includes(searchTerm.toLowerCase()) || w.ALMACEN_DESCRIPCION.toLowerCase().includes(searchTerm.toLowerCase());
+            return sucMatch && groupMatch && termMatch;
         });
 
-        if (filteredTransactions.length === 0) {
-            container.innerHTML = `<p class="text-slate-500 col-span-full text-center">No se encontraron transacciones que coincidan con los filtros.</p>`;
+        if (filtered.length === 0) {
+            container.innerHTML = `<p class="text-slate-500 col-span-full text-center">No se encontraron almacenes que coincidan con los filtros.</p>`;
             return;
         }
 
-        filteredTransactions.forEach(t => {
+        filtered.forEach(w => {
             const card = `
                 <div class="bg-white p-4 rounded-lg shadow-md border border-slate-200 transaction-card transition-all duration-200">
                     <div class="flex justify-between items-start">
-                        <h4 class="font-bold text-slate-800">${t.type}</h4>
-                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${t.group === 'SAP' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">${t.group}</span>
+                        <h4 class="font-bold text-slate-800">${w.ALMACEN} <span class="text-sm font-normal text-slate-500">(${w.ORGANIZATION_ID})</span></h4>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">${w.SUC}</span>
                     </div>
-                    <p class="text-sm text-slate-600 mt-2">${t.detail}</p>
+                    <p class="text-sm text-slate-600 mt-2">${w.ALMACEN_DESCRIPCION}</p>
                     <div class="mt-4 pt-3 border-t border-slate-200 text-xs space-y-2">
-                        <p><strong class="font-semibold text-slate-700">Origen:</strong> ${t.origin}</p>
-                        <p><strong class="font-semibold text-slate-700">Requiere Alias:</strong> ${t.alias ? '<span class="text-red-600 font-bold">Sí</span>' : 'No'}</p>
+                        <p><strong class="font-semibold text-slate-700">Grupo:</strong> ${w.GRUPO_ORGANIZACIONES}</p>
+                        <p><strong class="font-semibold text-slate-700">Agrupador:</strong> ${w.Almacen_Agrupador}</p>
                     </div>
                 </div>
             `;
@@ -841,32 +876,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const setupGlossaryFilters = () => {
-        const filterSelect = document.getElementById('glossary-filter');
-        const searchInput = document.getElementById('glossary-search');
+    const setupWarehouseFilters = () => {
+        const sucFilter = document.getElementById('warehouse-filter-suc');
+        const groupFilter = document.getElementById('warehouse-filter-group');
+        const searchInput = document.getElementById('warehouse-search');
 
         const applyFilters = () => {
-            const group = filterSelect.value;
+            const suc = sucFilter.value;
+            const group = groupFilter.value;
             const search = searchInput.value;
-            populateGlossary(group, search);
+            populateWarehouses(suc, group, search);
         };
 
-        filterSelect.addEventListener('change', applyFilters);
+        sucFilter.addEventListener('change', applyFilters);
+        groupFilter.addEventListener('change', applyFilters);
         searchInput.addEventListener('input', applyFilters);
     };
+
 
     // Initial Setup
     setupExplorationTabs();
     setupBranchTabs();
     setupInventoryPills();
     setupPersonnelPills();
-    setupGlossaryFilters();
+    populateWarehouseFilters();
+    setupWarehouseFilters();
     
     // Default states
     updateInventoryLogic('RECEPCIONES');
     updateBranchLogic('SCZ');
     updatePersonnelDetails('reubicados');
-    populateGlossary();
+    populateWarehouses();
     
     // Set default active pills and tabs
     document.querySelector('#exploration-tabs button[data-tab="inventory"]').click();
